@@ -1,0 +1,64 @@
+{
+  "name": "@teamgaga/open-api",
+  "version": "0.1.2",
+  "description": "TeamGaga Open Platform SDK for JavaScript and TypeScript",
+  "keywords": [
+    "bot",
+    "sdk",
+    "teamgaga"
+  ],
+  "homepage": "https://github.com/AlbertaMoulton/open-api#readme",
+  "bugs": {
+    "url": "https://github.com/AlbertaMoulton/open-api/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlbertaMoulton/open-api.git"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "ready": "pnpm run check && pnpm run test && pnpm run build",
+    "build": "vp pack",
+    "check": "vp check",
+    "check:fix": "vp check --fix",
+    "dev": "vp pack --watch",
+    "fmt": "vp fmt . --write",
+    "fmt:check": "vp fmt --check",
+    "lint": "vp lint",
+    "lint:fix": "vp lint --fix",
+    "typecheck": "vp exec tsc --noEmit",
+    "test": "vp test",
+    "release:major": "node scripts/release.mjs major",
+    "release:minor": "node scripts/release.mjs minor",
+    "release:patch": "node scripts/release.mjs patch",
+    "prepublishOnly": "vp run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.0.0",
+    "vite-plus": "latest"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@10.33.2"
+}
