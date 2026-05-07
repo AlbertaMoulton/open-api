@@ -174,7 +174,7 @@ test("community and role methods use documented paths", async () => {
   );
 });
 
-test("moderation methods map camelCase params to documented fields", async () => {
+test("moderation methods pass documented snake_case params through", async () => {
   const { api, fetchMock } = createApi(null);
 
   await api.muteCommunityMember("community-1", "user-1", {

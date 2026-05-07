@@ -1,4 +1,4 @@
-import { TeamGagaApiError } from "./errors";
+import { ApiError } from "./errors";
 
 const DEFAULT_BASE_URL = "https://open.teamgaga.com";
 
@@ -24,7 +24,7 @@ export type ApiClientRequestOptions = {
   signal?: AbortSignal;
 };
 
-type TeamGagaApiEnvelope<T> = {
+type ApiEnvelope<T> = {
   status: boolean;
   code: number;
   message: string;
@@ -66,10 +66,10 @@ export class ApiClient {
     }
 
     const response = await this.fetchImpl(url, init);
-    const envelope = (await response.json()) as Partial<TeamGagaApiEnvelope<T>>;
+    const envelope = (await response.json()) as Partial<ApiEnvelope<T>>;
 
     if (!response.ok) {
-      throw new TeamGagaApiError(envelope.message ?? `TeamGaga API error: ${response.status}`, {
+      throw new ApiError(envelope.message ?? `TeamGaga API error: ${response.status}`, {
         status: response.status,
         code: envelope.code,
         request_id: envelope.request_id,
@@ -78,7 +78,7 @@ export class ApiClient {
     }
 
     if (envelope.status !== true) {
-      throw new TeamGagaApiError(envelope.message ?? "TeamGaga API error", {
+      throw new ApiError(envelope.message ?? "TeamGaga API error", {
         status: response.status,
         code: envelope.code,
         request_id: envelope.request_id,

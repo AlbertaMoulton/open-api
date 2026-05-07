@@ -53,7 +53,7 @@ Public API methods always use the newest documented endpoint for a feature and d
 
 ## Raw API and Transformers
 
-`bot.api` is the friendly camelCase facade. For lower-level integrations, `bot.api.raw` exposes documented payload fields directly:
+`bot.api` is the friendly method facade. For lower-level integrations, `bot.api.raw` exposes documented payload fields directly:
 
 ```ts
 await bot.api.raw.sendMessage({
@@ -95,12 +95,12 @@ const communities = await oauth.getCommunities(token.access_token);
 ## Error Handling
 
 ```ts
-import { TeamGagaApiError } from "@teamgaga/open-api";
+import { ApiError } from "@teamgaga/open-api";
 
 try {
   await bot.api.getMe();
 } catch (error) {
-  if (error instanceof TeamGagaApiError) {
+  if (error instanceof ApiError) {
     console.error(error.status, error.code, error.request_id, error.message);
   }
 }

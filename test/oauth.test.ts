@@ -1,12 +1,12 @@
 import { expect, test, vi } from "vite-plus/test";
 import * as openApi from "../src";
-import { Api, Bot, OAuth, TeamGagaApiError } from "../src";
+import { Api, Bot, OAuth, ApiError } from "../src";
 
 test("public exports include new primary classes", () => {
   expect(Bot).toBeDefined();
   expect(Api).toBeDefined();
   expect(OAuth).toBeDefined();
-  expect(TeamGagaApiError).toBeDefined();
+  expect(ApiError).toBeDefined();
   expect("Client" in openApi).toBe(false);
 });
 

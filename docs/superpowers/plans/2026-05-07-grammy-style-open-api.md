@@ -12,7 +12,7 @@
 
 ## File Structure
 
-- Create `src/errors.ts`: `TeamGagaApiError` and related response metadata.
+- Create `src/errors.ts`: `ApiError` and related response metadata.
 - Replace `src/client.ts`: shared HTTP client with auth schemes, query/body/form-data helpers, and response envelope unwrapping.
 - Replace `src/types.ts`: public re-export hub for type modules.
 - Create `src/types/models.ts`: documented TeamGaga response models.
@@ -50,7 +50,7 @@
 ```ts
 import { expect, test, vi } from "vite-plus/test";
 import { Client } from "../src/client";
-import { TeamGagaApiError } from "../src/errors";
+import { ApiError } from "../src/errors";
 
 test("Client unwraps successful TeamGaga envelopes", async () => {
   const fetchMock = vi.fn(async () =>
@@ -99,7 +99,7 @@ test("Client serializes query params and bot auth header", async () => {
   expect((init.headers as Headers).get("Authorization")).toBe("Bot token");
 });
 
-test("Client throws TeamGagaApiError for failed envelopes", async () => {
+test("Client throws ApiError for failed envelopes", async () => {
   const fetchMock = vi.fn(async () =>
     Response.json({
       status: false,
@@ -116,7 +116,7 @@ test("Client throws TeamGagaApiError for failed envelopes", async () => {
   });
 
   await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toMatchObject({
-    name: "TeamGagaApiError",
+    name: "ApiError",
     code: 4001,
     request_id: "request-id",
     status: 200,
@@ -124,7 +124,7 @@ test("Client throws TeamGagaApiError for failed envelopes", async () => {
   });
 });
 
-test("Client throws TeamGagaApiError for non-2xx HTTP responses", async () => {
+test("Client throws ApiError for non-2xx HTTP responses", async () => {
   const fetchMock = vi.fn(async () =>
     Response.json(
       { status: false, code: 5000, message: "Broken", data: null, request_id: "request-id" },
@@ -137,9 +137,7 @@ test("Client throws TeamGagaApiError for non-2xx HTTP responses", async () => {
     fetch: fetchMock as unknown as typeof fetch,
   });
 
-  await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toBeInstanceOf(
-    TeamGagaApiError,
-  );
+  await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toBeInstanceOf(ApiError);
 });
 ```
 
@@ -151,7 +149,7 @@ Expected: FAIL because `Client` does not accept `{ token, auth }` and does not e
 
 - [ ] **Step 3: Implement minimal client, errors, and core types**
 
-Create `TeamGagaApiError`, rewrite `Client` around `request(path, options)`, add query serialization, JSON body serialization, auth header schemes, and response envelope unwrapping.
+Create `ApiError`, rewrite `Client` around `request(path, options)`, add query serialization, JSON body serialization, auth header schemes, and response envelope unwrapping.
 
 - [ ] **Step 4: Run green test**
 
@@ -245,7 +243,7 @@ Expected: FAIL because `src/api.ts` does not exist.
 
 - [ ] **Step 3: Implement minimal `Api` facade**
 
-Add all phase-one methods from the design, using `Client` internally and converting camelCase params to documented JSON/query fields.
+Add all phase-one methods from the design, using `Client` internally and passing documented snake_case params through to JSON/query fields.
 
 - [ ] **Step 4: Run green test**
 
@@ -502,13 +500,13 @@ git commit -m "feat: add grammY-style bot runtime"
 
 ```ts
 import { expect, test, vi } from "vite-plus/test";
-import { OAuth, Bot, Api, TeamGagaApiError } from "../src";
+import { OAuth, Bot, Api, ApiError } from "../src";
 
 test("public exports include new primary classes", () => {
   expect(Bot).toBeDefined();
   expect(Api).toBeDefined();
   expect(OAuth).toBeDefined();
-  expect(TeamGagaApiError).toBeDefined();
+  expect(ApiError).toBeDefined();
 });
 
 test("OAuth createToken uses Oauth base credential auth", async () => {
@@ -560,7 +558,7 @@ test("OAuth getUser uses Access auth", async () => {
 
 Run: `pnpm test test/oauth.test.ts`
 
-Expected: FAIL because `OAuth`, `Api`, and `TeamGagaApiError` are not exported yet.
+Expected: FAIL because `OAuth`, `Api`, and `ApiError` are not exported yet.
 
 - [ ] **Step 3: Implement OAuth and public exports**
 
@@ -607,4 +605,4 @@ git commit -m "docs: update sdk usage guide"
 - Spec coverage: Covered Bot, Composer, Context, Api, OAuth, Client, errors, latest endpoint policy, no legacy compatibility, and README update.
 - Intentional omission: `ctx.answerCallback` is not part of this SDK.
 - Placeholder scan: No placeholder steps are required for execution; implementation choices are constrained by exact files, tests, and expected commands.
-- Type consistency: Public inputs use camelCase `Params`; server models keep documented snake_case response fields.
+- Type consistency: Public inputs and server models both use documented snake_case fields.

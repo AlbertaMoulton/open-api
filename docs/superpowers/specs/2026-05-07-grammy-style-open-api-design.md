@@ -56,7 +56,7 @@ await bot.start();
 
 ### Api
 
-`Api` is the public, typed facade over TeamGaga Bot API endpoints. It should use TypeScript-friendly camelCase parameter names while keeping returned server models close to the documented field names.
+`Api` is the public, typed facade over TeamGaga Bot API endpoints. It should use documented snake_case parameter names while keeping returned server models close to the documented field names.
 
 ### Internal ApiClient and Raw HTTP
 
@@ -302,7 +302,7 @@ Authorization: Access <access_token>
 
 ## Type Strategy
 
-Public request parameter types should use camelCase names:
+Public request parameter types should use documented snake_case names:
 
 ```ts
 type SendMessageParams = {
@@ -343,10 +343,10 @@ Avoid public `Req` and `Resp` suffixes unless mirroring a documented object is n
 
 ## Error Model
 
-All failed API calls should throw `TeamGagaApiError`.
+All failed API calls should throw `ApiError`.
 
 ```ts
-class TeamGagaApiError extends Error {
+class ApiError extends Error {
   readonly status: number;
   readonly code?: number;
   readonly request_id?: string;
@@ -360,7 +360,7 @@ The error should cover:
 - API envelopes whose `status` field is false.
 - Invalid or unexpected response envelopes.
 
-Network and abort errors from `fetch` may pass through unchanged or be wrapped in a separate `TeamGagaNetworkError` later. Phase one should document the chosen behavior in tests.
+Network and abort errors from `fetch` may pass through unchanged or be wrapped in a separate `NetworkError` later. Phase one should document the chosen behavior in tests.
 
 ## Testing Strategy
 
@@ -374,7 +374,7 @@ Required first-phase tests:
 - `Composer` dispatches `message`, `message:text`, `event:*`, and `command` filters correctly.
 - Middleware order and `next()` behavior match the documented model.
 - `Context` convenience methods call the expected `Api` methods.
-- API envelope failures throw `TeamGagaApiError` with code, status, message, and request ID.
+- API envelope failures throw `ApiError` with code, status, message, and request ID.
 - OAuth token and resource methods use the correct auth header schemes.
 
 ## Implementation Phases

@@ -1,19 +1,19 @@
-export type TeamGagaApiErrorOptions = {
+export type ApiErrorOptions = {
   status: number;
   code?: number;
   request_id?: string;
   response?: Response;
 };
 
-export class TeamGagaApiError extends Error {
+export class ApiError extends Error {
   readonly status: number;
   readonly code?: number;
   readonly request_id?: string;
   readonly response?: Response;
 
-  constructor(message: string, options: TeamGagaApiErrorOptions) {
+  constructor(message: string, options: ApiErrorOptions) {
     super(message);
-    this.name = "TeamGagaApiError";
+    this.name = "ApiError";
     this.status = options.status;
     this.code = options.code;
     this.request_id = options.request_id;
