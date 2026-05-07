@@ -339,7 +339,7 @@ Expected: FAIL because `Composer` and `Context` do not exist in the new form.
 
 - [ ] **Step 3: Implement Composer and Context**
 
-Implement middleware composition, `use`, `on`, `command`, `filter`, and context shortcuts. Keep `ctx.answerCallback` out unless an endpoint is confirmed.
+Implement middleware composition, `use`, `on`, `command`, `filter`, and context shortcuts. Do not add `ctx.answerCallback`.
 
 - [ ] **Step 4: Run green test**
 
@@ -605,6 +605,6 @@ git commit -m "docs: update sdk usage guide"
 ## Self-Review
 
 - Spec coverage: Covered Bot, Composer, Context, Api, OAuth, Client, errors, latest endpoint policy, no legacy compatibility, and README update.
-- Intentional phase-one omission: `ctx.answerCallback` is not implemented unless a documented endpoint is confirmed.
+- Intentional omission: `ctx.answerCallback` is not part of this SDK.
 - Placeholder scan: No placeholder steps are required for execution; implementation choices are constrained by exact files, tests, and expected commands.
 - Type consistency: Public inputs use camelCase `Params`; server models keep documented snake_case response fields.

@@ -167,12 +167,11 @@ ctx.replyMarkdown(content, options?);
 ctx.editMessage(content, options?);
 ctx.deleteMessage();
 ctx.react(reaction);
-ctx.answerCallback(data?);
 ```
 
 `ctx.reply` should send to the current channel and quote the current message when a message ID is available. Options should allow callers to override quote behavior and pass message fields such as attachments, reactions, ephemeral visibility, and rich text flags.
 
-`ctx.answerCallback` should not be included until a documented callback response endpoint is available. The current API references define callback event payloads, but they do not document how a bot should acknowledge or answer such callbacks.
+The SDK does not provide an `answerCallback` helper. Callback events can still be observed with `event:Callback` filters.
 
 ## Public Api Facade
 
@@ -401,6 +400,5 @@ Required first-phase tests:
 
 ## Open Questions
 
-- Whether `ctx.answerCallback` has a documented endpoint in the current API references. If not, it should be removed from phase one.
 - Whether `Authorization: Teamgaga Token <bot_token>` in `new_general.md` or `Authorization: Bot <bot_token>` in `index.md` is the canonical Bot API auth scheme. The implementation should verify this before coding.
 - Whether markdown messages should be treated as a distinct message type filter or only as a sending method. Phase one can support `message:text` first and add `message:markdown` only if incoming payloads identify it reliably.

@@ -71,7 +71,7 @@ bot.api.use(async (prev, method, payload, signal) => {
 });
 ```
 
-Callback events can be handled with `bot.on("event:Callback", ...)`. The SDK does not expose an `answerCallback` helper yet because the current API references document the callback event payload but not a callback response endpoint.
+Callback events can be handled with `bot.on("event:Callback", ...)`. The SDK does not provide an `answerCallback` helper.
 
 ## OAuth Example
 
