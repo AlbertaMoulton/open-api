@@ -51,20 +51,20 @@ export class Context {
 
   reply(content: string, options: ReplyOptions = {}) {
     const channelId = this.requireChannelId("reply");
-    const { quote = true, quoteId, ...rest } = options;
+    const { quote = true, quote_id, ...rest } = options;
 
     return this.api.sendMessage({
       ...rest,
-      channelId,
+      channel_id: channelId,
       content,
-      quoteId: quote ? (quoteId ?? this.messageId) : quoteId,
+      quote_id: quote ? (quote_id ?? this.messageId) : quote_id,
     });
   }
 
   replyMarkdown(content: string, options: ReplyMarkdownOptions = {}) {
     return this.api.sendMarkdownMessage({
       ...options,
-      channelId: this.requireChannelId("reply with markdown"),
+      channel_id: this.requireChannelId("reply with markdown"),
       content,
     });
   }
@@ -74,7 +74,7 @@ export class Context {
 
     return this.api.editMessage(messageId, {
       ...options,
-      channelId: this.requireChannelId("edit message"),
+      channel_id: this.requireChannelId("edit message"),
       content,
     });
   }

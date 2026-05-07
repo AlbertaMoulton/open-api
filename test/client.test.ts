@@ -75,7 +75,7 @@ test("ApiClient throws TeamGagaApiError for failed envelopes", async () => {
   await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toMatchObject({
     name: "TeamGagaApiError",
     code: 4001,
-    requestId: "request-id",
+    request_id: "request-id",
     status: 200,
     message: "Nope",
   });

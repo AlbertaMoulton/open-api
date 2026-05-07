@@ -9,9 +9,9 @@ export class OAuth {
   private readonly fetchImpl?: typeof fetch;
 
   constructor(options: OAuthOptions) {
-    this.appId = options.appId;
-    this.appSecret = options.appSecret;
-    this.baseUrl = options.baseUrl;
+    this.appId = options.app_id;
+    this.appSecret = options.app_secret;
+    this.baseUrl = options.base_url;
     this.fetchImpl = options.fetch;
   }
 
@@ -19,10 +19,10 @@ export class OAuth {
     return this.baseClient().request("/v1/oauth/token", {
       method: "POST",
       body: {
-        grant_type: params.grantType,
+        grant_type: params.grant_type,
         code: params.code,
-        refresh_token: params.refreshToken,
-        redirect_uri: params.redirectUri,
+        refresh_token: params.refresh_token,
+        redirect_uri: params.redirect_uri,
       },
     });
   }
@@ -39,7 +39,7 @@ export class OAuth {
     return new ApiClient({
       token: base64(`${this.appId}:${this.appSecret}`),
       auth: "Oauth",
-      baseUrl: this.baseUrl,
+      base_url: this.baseUrl,
       fetch: this.fetchImpl,
     });
   }
@@ -48,7 +48,7 @@ export class OAuth {
     return new ApiClient({
       token: accessToken,
       auth: "Access",
-      baseUrl: this.baseUrl,
+      base_url: this.baseUrl,
       fetch: this.fetchImpl,
     });
   }

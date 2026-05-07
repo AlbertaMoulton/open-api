@@ -4,18 +4,18 @@ export type AllowedUpdate = "message" | "event";
 
 export type GetUpdatesOptions = {
   limit?: number;
-  allowedUpdates?: AllowedUpdate[];
+  allowed_updates?: AllowedUpdate[];
 };
 
 export type SendMessageParams = {
-  channelId: string;
+  channel_id: string;
   content: string;
-  quoteId?: string;
+  quote_id?: string;
   type?: number;
   attachments?: Attachment[];
   ephemeral?: boolean;
-  userIds?: string[];
-  disableReactions?: boolean;
+  user_ids?: string[];
+  disable_reactions?: boolean;
   reactions?: ReactionItem[];
   richtext?: boolean;
 };
@@ -24,8 +24,8 @@ export type SendMessageResponse = {
   message_id: string;
 };
 
-export type BatchMessageItem = Omit<SendMessageParams, "quoteId"> & {
-  channelIds: string[];
+export type BatchMessageItem = Omit<SendMessageParams, "quote_id"> & {
+  channel_ids: string[];
 };
 
 export type SendBatchMessagesParams = {
@@ -33,13 +33,13 @@ export type SendBatchMessagesParams = {
 };
 
 export type SendMarkdownMessageParams = {
-  channelId: string;
+  channel_id: string;
   content: string;
   title?: string;
 };
 
 export type EditMessageParams = {
-  channelId: string;
+  channel_id: string;
   content: string;
   attachments?: Attachment[];
 };
@@ -51,43 +51,43 @@ export type SetMessageReactionParams = {
 };
 
 export type AddMessageKeysParams = {
-  channelId: string;
+  channel_id: string;
   keys: string[];
-  memberId: string;
-  messageId: string;
+  member_id: string;
+  message_id: string;
 };
 
 export type DeleteMessageKeyParams = {
   key: string;
-  memberId: string;
-  messageId: string;
-  channelId: string;
+  member_id: string;
+  message_id: string;
+  channel_id: string;
 };
 
 export type MemberListOptions = {
   limit?: number;
   after?: string;
-  excludeUserId?: string;
+  exclude_user_id?: string;
   keyword?: string;
 };
 
 export type BanCommunityMemberParams = {
-  userId: string;
+  user_id: string;
 };
 
 export type MuteCommunityMemberParams = {
-  muteTime: number;
-  channelId?: string;
+  mute_time: number;
+  channel_id?: string;
 };
 
 export type UpdateCommunityMemberRolesParams = {
-  memberId: string;
-  addRoleIds?: string[];
-  delRoleIds?: string[];
+  member_id: string;
+  add_role_ids?: string[];
+  del_role_ids?: string[];
 };
 
 export type GetUserOptions = {
-  communityId?: string;
+  community_id?: string;
 };
 
 export type ImageOperation = {

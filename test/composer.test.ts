@@ -62,8 +62,8 @@ test("Context reply quotes current message", async () => {
   await ctx.reply("pong");
 
   expect(api.sendMessage).toHaveBeenCalledWith({
-    channelId: "channel-1",
+    channel_id: "channel-1",
     content: "pong",
-    quoteId: "message-1",
+    quote_id: "message-1",
   });
 });

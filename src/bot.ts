@@ -39,7 +39,7 @@ export class Bot extends Composer<Context> {
       try {
         const updates = await this.api.getUpdates({
           limit: polling.limit,
-          allowedUpdates: polling.allowedUpdates,
+          allowed_updates: polling.allowed_updates,
         });
 
         for (const update of toUpdates(updates)) {
@@ -79,7 +79,7 @@ export class Bot extends Composer<Context> {
 
 function pickApiOptions(options: BotOptions): ApiOptions {
   return {
-    baseUrl: options.baseUrl,
+    base_url: options.base_url,
     fetch: options.fetch,
   };
 }

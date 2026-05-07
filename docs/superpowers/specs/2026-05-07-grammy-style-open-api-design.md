@@ -90,12 +90,12 @@ src/
 
 ```ts
 const bot = new Bot(token, {
-  baseUrl: "https://open.teamgaga.com",
+  base_url: "https://open.teamgaga.com",
   fetch,
   polling: {
     limit: 200,
     interval: 3000,
-    allowedUpdates: ["message", "event"],
+    allowed_updates: ["message", "event"],
   },
 });
 ```
@@ -152,7 +152,7 @@ ctx.api;
 ctx.message;
 ctx.event;
 ctx.chatId;
-ctx.channelId;
+ctx.channel_id;
 ctx.communityId;
 ctx.userId;
 ctx.messageId;
@@ -186,8 +186,8 @@ api.sendMessage(params);
 api.sendBatchMessages(params);
 api.sendMarkdownMessage(params);
 api.editMessage(messageId, params);
-api.deleteMessage(channelId, messageId);
-api.setMessageReaction(channelId, messageId, params);
+api.deleteMessage(channel_id, messageId);
+api.setMessageReaction(channel_id, messageId, params);
 api.addMessageKeys(params);
 api.deleteMessageKey(params);
 ```
@@ -266,12 +266,12 @@ OAuth should be a separate entry point because it uses `Oauth` and `Access` auth
 import { OAuth } from "@teamgaga/open-api";
 
 const oauth = new OAuth({
-  appId,
-  appSecret,
+  app_id,
+  app_secret,
 });
 
 const token = await oauth.createToken({
-  grantType: "access_token",
+  grant_type: "access_token",
   code,
 });
 
@@ -305,16 +305,16 @@ Public request parameter types should use camelCase names:
 
 ```ts
 type SendMessageParams = {
-  channelId: string;
+  channel_id: string;
   content: string;
   type?: number;
   attachments?: Attachment[];
   ephemeral?: boolean;
-  userIds?: string[];
-  disableReactions?: boolean;
+  user_ids?: string[];
+  disable_reactions?: boolean;
   reactions?: ReactionItem[];
   richtext?: boolean;
-  quoteId?: string;
+  quote_id?: string;
 };
 ```
 
@@ -348,7 +348,7 @@ All failed API calls should throw `TeamGagaApiError`.
 class TeamGagaApiError extends Error {
   readonly status: number;
   readonly code?: number;
-  readonly requestId?: string;
+  readonly request_id?: string;
   readonly response?: Response;
 }
 ```

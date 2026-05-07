@@ -21,7 +21,7 @@ function createApi(data: unknown = { message_id: "message-1" }) {
 test("sendMessage uses latest v2 endpoint without versioned method name", async () => {
   const { api, fetchMock } = createApi();
 
-  await api.sendMessage({ channelId: "channel-1", content: "hello", quoteId: "message-0" });
+  await api.sendMessage({ channel_id: "channel-1", content: "hello", quote_id: "message-0" });
 
   expect(fetchMock).toHaveBeenCalledWith(
     new URL("https://open.teamgaga.com/bot/v2/messages"),
@@ -92,7 +92,7 @@ test("Api transformers can observe and modify calls", async () => {
 test("getUpdates maps polling options to query params", async () => {
   const { api, fetchMock } = createApi({ im: [], event: [] });
 
-  await api.getUpdates({ limit: 5, allowedUpdates: ["message", "event"] });
+  await api.getUpdates({ limit: 5, allowed_updates: ["message", "event"] });
 
   const [url] = fetchMock.mock.calls[0] as unknown as [URL, RequestInit];
 
@@ -119,13 +119,13 @@ test("moderation methods map camelCase params to documented fields", async () =>
   const { api, fetchMock } = createApi(null);
 
   await api.muteCommunityMember("community-1", "user-1", {
-    muteTime: 60,
-    channelId: "channel-1",
+    mute_time: 60,
+    channel_id: "channel-1",
   });
   await api.updateCommunityMemberRoles("community-1", {
-    memberId: "user-1",
-    addRoleIds: ["role-1"],
-    delRoleIds: ["role-2"],
+    member_id: "user-1",
+    add_role_ids: ["role-1"],
+    del_role_ids: ["role-2"],
   });
 
   expect((fetchMock.mock.calls[0] as unknown as [URL, RequestInit])[1].body).toBe(

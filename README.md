@@ -30,7 +30,7 @@ bot.on("message:text", async (ctx) => {
 
 await bot.start({
   interval: 3000,
-  allowedUpdates: ["message", "event"],
+  allowed_updates: ["message", "event"],
 });
 ```
 
@@ -44,7 +44,7 @@ const bot = new Bot(process.env.TEAMGAGA_BOT_TOKEN!);
 const me = await bot.api.getMe();
 
 await bot.api.sendMessage({
-  channelId: "channel-id",
+  channel_id: "channel-id",
   content: `Hello from ${me.name}.`,
 });
 ```
@@ -77,12 +77,12 @@ bot.api.use(async (prev, method, payload, signal) => {
 import { OAuth } from "@teamgaga/open-api";
 
 const oauth = new OAuth({
-  appId: process.env.TEAMGAGA_APP_ID!,
-  appSecret: process.env.TEAMGAGA_APP_SECRET!,
+  app_id: process.env.TEAMGAGA_APP_ID!,
+  app_secret: process.env.TEAMGAGA_APP_SECRET!,
 });
 
 const token = await oauth.createToken({
-  grantType: "access_token",
+  grant_type: "access_token",
   code: "authorization-code",
 });
 
@@ -99,7 +99,7 @@ try {
   await bot.api.getMe();
 } catch (error) {
   if (error instanceof TeamGagaApiError) {
-    console.error(error.status, error.code, error.requestId, error.message);
+    console.error(error.status, error.code, error.request_id, error.message);
   }
 }
 ```

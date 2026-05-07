@@ -118,7 +118,7 @@ test("Client throws TeamGagaApiError for failed envelopes", async () => {
   await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toMatchObject({
     name: "TeamGagaApiError",
     code: 4001,
-    requestId: "request-id",
+    request_id: "request-id",
     status: 200,
     message: "Nope",
   });
@@ -200,7 +200,7 @@ function createApi() {
 test("sendMessage uses latest v2 endpoint without versioned method name", async () => {
   const { api, fetchMock } = createApi();
 
-  await api.sendMessage({ channelId: "channel-1", content: "hello", quoteId: "message-0" });
+  await api.sendMessage({ channel_id: "channel-1", content: "hello", quote_id: "message-0" });
 
   expect(fetchMock).toHaveBeenCalledWith(
     new URL("https://open.teamgaga.com/bot/v2/messages"),
@@ -214,7 +214,7 @@ test("sendMessage uses latest v2 endpoint without versioned method name", async 
 test("getUpdates maps polling options to query params", async () => {
   const { api, fetchMock } = createApi();
 
-  await api.getUpdates({ limit: 5, allowedUpdates: ["message", "event"] });
+  await api.getUpdates({ limit: 5, allowed_updates: ["message", "event"] });
 
   const [url] = fetchMock.mock.calls[0] as [URL, RequestInit];
   expect(url.toString()).toBe(
@@ -324,9 +324,9 @@ test("Context reply quotes current message", async () => {
   await ctx.reply("pong");
 
   expect(api.sendMessage).toHaveBeenCalledWith({
-    channelId: "channel-1",
+    channel_id: "channel-1",
     content: "pong",
-    quoteId: "message-1",
+    quote_id: "message-1",
   });
 });
 ```
@@ -522,12 +522,12 @@ test("OAuth createToken uses Oauth base credential auth", async () => {
     }),
   );
   const oauth = new OAuth({
-    appId: "app",
-    appSecret: "secret",
+    app_id: "app",
+    app_secret: "secret",
     fetch: fetchMock as unknown as typeof fetch,
   });
 
-  await oauth.createToken({ grantType: "access_token", code: "code" });
+  await oauth.createToken({ grant_type: "access_token", code: "code" });
 
   const [, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
   expect((init.headers as Headers).get("Authorization")).toBe("Oauth YXBwOnNlY3JldA==");
@@ -544,8 +544,8 @@ test("OAuth getUser uses Access auth", async () => {
     }),
   );
   const oauth = new OAuth({
-    appId: "app",
-    appSecret: "secret",
+    app_id: "app",
+    app_secret: "secret",
     fetch: fetchMock as unknown as typeof fetch,
   });
 

@@ -28,7 +28,7 @@ import type {
 } from "./types/models";
 
 export type ApiOptions = {
-  baseUrl?: string;
+  base_url?: string;
   fetch?: typeof fetch;
 };
 
@@ -78,7 +78,7 @@ export class Api {
     this.client = new ApiClient({
       token,
       auth: "Bot",
-      baseUrl: options.baseUrl,
+      base_url: options.base_url,
       fetch: options.fetch,
     });
     this.call = this.callApi.bind(this);
@@ -102,7 +102,7 @@ export class Api {
       method: "GET",
       query: {
         limit: options.limit,
-        filter: options.allowedUpdates?.map((update) => (update === "message" ? "im" : "event")),
+        filter: options.allowed_updates?.map((update) => (update === "message" ? "im" : "event")),
       },
     });
   }
@@ -117,7 +117,7 @@ export class Api {
       body: {
         items: params.items.map((item) => ({
           ...messageBody(item),
-          channel_ids: item.channelIds,
+          channel_ids: item.channel_ids,
         })),
       },
     });
@@ -127,7 +127,7 @@ export class Api {
     return this.client.request("/bot/v1/md_messages", {
       method: "POST",
       body: {
-        channel_id: params.channelId,
+        channel_id: params.channel_id,
         content: params.content,
         title: params.title,
       },
@@ -138,7 +138,7 @@ export class Api {
     return this.client.request(`/bot/v1/messages/${encodeURIComponent(messageId)}`, {
       method: "PATCH",
       body: {
-        channel_id: params.channelId,
+        channel_id: params.channel_id,
         content: params.content,
         attachments: params.attachments,
       },
@@ -174,10 +174,10 @@ export class Api {
     return this.client.request("/bot/v1/messages/keys", {
       method: "POST",
       body: {
-        channel_id: params.channelId,
+        channel_id: params.channel_id,
         keys: params.keys,
-        member_id: params.memberId,
-        message_id: params.messageId,
+        member_id: params.member_id,
+        message_id: params.message_id,
       },
     });
   }
@@ -187,9 +187,9 @@ export class Api {
       method: "DELETE",
       query: {
         key: params.key,
-        member_id: params.memberId,
-        message_id: params.messageId,
-        channel_id: params.channelId,
+        member_id: params.member_id,
+        message_id: params.message_id,
+        channel_id: params.channel_id,
       },
     });
   }
@@ -234,7 +234,7 @@ export class Api {
   banCommunityMember(communityId: string, params: BanCommunityMemberParams): Promise<void> {
     return this.client.request(`/bot/v1/communities/${encodeURIComponent(communityId)}/ban`, {
       method: "POST",
-      body: { user_id: params.userId },
+      body: { user_id: params.user_id },
     });
   }
 
@@ -255,8 +255,8 @@ export class Api {
       {
         method: "POST",
         body: {
-          mute_time: params.muteTime,
-          channel_id: params.channelId,
+          mute_time: params.mute_time,
+          channel_id: params.channel_id,
         },
       },
     );
@@ -282,9 +282,9 @@ export class Api {
     return this.client.request(`/bot/v1/communities/${encodeURIComponent(communityId)}/roles`, {
       method: "PATCH",
       body: {
-        member_id: params.memberId,
-        add_role_ids: params.addRoleIds,
-        del_role_ids: params.delRoleIds,
+        member_id: params.member_id,
+        add_role_ids: params.add_role_ids,
+        del_role_ids: params.del_role_ids,
       },
     });
   }
@@ -306,7 +306,7 @@ export class Api {
   getUser(userId: string, options: GetUserOptions = {}): Promise<ApiUserInfo> {
     return this.client.request(`/bot/v1/users/${encodeURIComponent(userId)}`, {
       method: "GET",
-      query: { community_id: options.communityId },
+      query: { community_id: options.community_id },
     });
   }
 
@@ -359,14 +359,14 @@ function httpMethodFor(method: RawApiMethod): string {
 
 function messageBody(params: SendMessageParams): RawSendMessageParams {
   return {
-    channel_id: params.channelId,
+    channel_id: params.channel_id,
     content: params.content,
-    quote_id: params.quoteId,
+    quote_id: params.quote_id,
     type: params.type,
     attachments: params.attachments,
     ephemeral: params.ephemeral,
-    user_ids: params.userIds,
-    disable_reactions: params.disableReactions,
+    user_ids: params.user_ids,
+    disable_reactions: params.disable_reactions,
     reactions: params.reactions,
     richtext: params.richtext,
   };
@@ -376,7 +376,7 @@ function memberListQuery(options: MemberListOptions) {
   return {
     limit: options.limit,
     after: options.after,
-    exclude_user_id: options.excludeUserId,
+    exclude_user_id: options.exclude_user_id,
     keyword: options.keyword,
   };
 }

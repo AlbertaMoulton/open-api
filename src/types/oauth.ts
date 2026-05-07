@@ -1,15 +1,15 @@
 export type OAuthOptions = {
-  appId: string;
-  appSecret: string;
-  baseUrl?: string;
+  app_id: string;
+  app_secret: string;
+  base_url?: string;
   fetch?: typeof fetch;
 };
 
 export type CreateTokenParams = {
-  grantType: "access_token" | "refresh_token";
+  grant_type: "access_token" | "refresh_token";
   code?: string;
-  refreshToken?: string;
-  redirectUri?: string;
+  refresh_token?: string;
+  redirect_uri?: string;
 };
 
 export type TokenResponse = {

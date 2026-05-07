@@ -34,7 +34,7 @@ export type ComposerFilter =
   | `event:${string}`;
 
 export type BotOptions = {
-  baseUrl?: string;
+  base_url?: string;
   fetch?: typeof fetch;
   polling?: PollingOptions;
 };
@@ -42,7 +42,7 @@ export type BotOptions = {
 export type PollingOptions = {
   limit?: number;
   interval?: number;
-  allowedUpdates?: Array<"message" | "event">;
+  allowed_updates?: Array<"message" | "event">;
 };
 
 export type StartOptions = PollingOptions & {

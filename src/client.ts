@@ -11,7 +11,7 @@ export type QueryParams = Record<string, QueryValue | QueryValue[]>;
 export type ApiClientOptions = {
   token: string;
   auth: AuthScheme;
-  baseUrl?: string;
+  base_url?: string;
   fetch?: typeof fetch;
 };
 
@@ -40,7 +40,7 @@ export class ApiClient {
   constructor(options: ApiClientOptions) {
     this.token = options.token;
     this.auth = options.auth;
-    this.baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
+    this.baseUrl = options.base_url ?? DEFAULT_BASE_URL;
     this.fetchImpl = options.fetch ?? fetch;
   }
 
@@ -69,7 +69,7 @@ export class ApiClient {
       throw new TeamGagaApiError(envelope.message ?? `TeamGaga API error: ${response.status}`, {
         status: response.status,
         code: envelope.code,
-        requestId: envelope.request_id,
+        request_id: envelope.request_id,
         response,
       });
     }
@@ -78,7 +78,7 @@ export class ApiClient {
       throw new TeamGagaApiError(envelope.message ?? "TeamGaga API error", {
         status: response.status,
         code: envelope.code,
-        requestId: envelope.request_id,
+        request_id: envelope.request_id,
         response,
       });
     }
