@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "API 概述"
+  },
+  {
+    "type": "file",
+    "name": "new_general",
+    "label": "通用"
+  },
+  {
+    "type": "file",
+    "name": "api-object",
+    "label": "模型定义表格"
+  },
+  {
+    "type": "file",
+    "name": "oauth",
+    "label": "Oauth"
+  }
+]
