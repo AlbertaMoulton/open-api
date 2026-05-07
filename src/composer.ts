@@ -1,4 +1,4 @@
-import type { ComposerFilter, Filter, Middleware } from "./types/bot";
+import type { ComposerFilter, Filter, Middleware, MiddlewareRunner } from "./types/bot";
 import { Context } from "./context";
 
 type MiddlewareEntry<C extends Context> = {
@@ -38,9 +38,9 @@ export class Composer<C extends Context = Context> {
     return this;
   }
 
-  middleware(): Middleware<C> {
-    return async (ctx, next = async () => undefined) => {
-      await run(this.entries, ctx, next, 0);
+  middleware(): MiddlewareRunner<C> {
+    return async (ctx, next) => {
+      await run(this.entries, ctx, next ?? (async () => undefined), 0);
     };
   }
 }
@@ -80,7 +80,8 @@ function filterFromName<C extends Context>(filter: ComposerFilter): Filter<C> {
   }
 
   if (filter === "message:text") {
-    return (ctx) => ctx.update.type === "message" && typeof ctx.text === "string" && ctx.text.length > 0;
+    return (ctx) =>
+      ctx.update.type === "message" && typeof ctx.text === "string" && ctx.text.length > 0;
   }
 
   if (filter === "message:markdown") {

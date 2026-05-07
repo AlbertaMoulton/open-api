@@ -32,7 +32,7 @@ export type Message = {
 export type EventType = "Reaction" | "Join" | "Callback" | "DeleteMessage" | "Unknown";
 
 export type Event = {
-  action: EventType | string;
+  action: string;
   data: unknown;
   channel_id?: string | null;
   community_bots?: number[] | null;

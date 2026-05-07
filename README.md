@@ -1,6 +1,8 @@
 # TeamGaga Open API SDK for JavaScript
 
-JavaScript and TypeScript SDK for the TeamGaga Open Platform.
+TypeScript-first SDK for building TeamGaga bots and OAuth integrations.
+
+The bot runtime follows a grammY-style shape: `Bot` runs polling, `Composer` routes middleware, `Context` wraps every update, and `Api` exposes typed TeamGaga Bot API methods.
 
 ## Install
 
@@ -15,34 +17,71 @@ import { Bot } from "@teamgaga/open-api";
 
 const bot = new Bot(process.env.TEAMGAGA_BOT_TOKEN!);
 
-bot.on("message", async (ctx) => {
-  if (ctx.text !== "roll") return;
-
-  const point = Math.floor(Math.random() * 6) + 1;
-  await ctx.reply(`You rolled ${point}.`);
+bot.command("ping", async (ctx) => {
+  await ctx.reply("pong");
 });
 
-bot.start({ pollInterval: 3000 });
+bot.on("message:text", async (ctx) => {
+  if (ctx.text === "roll") {
+    const point = Math.floor(Math.random() * 6) + 1;
+    await ctx.reply(`You rolled ${point}.`);
+  }
+});
+
+await bot.start({
+  interval: 3000,
+  allowedUpdates: ["message", "event"],
+});
 ```
 
-TeamGaga bots currently receive messages by polling. Keep `pollInterval` at `3000` milliseconds or higher unless you have a good reason to change it.
-
-## API Client Example
+## API Example
 
 ```ts
-import { Client } from "@teamgaga/open-api";
+import { Bot } from "@teamgaga/open-api";
 
-const client = new Client({
-  botToken: process.env.TEAMGAGA_BOT_TOKEN!,
+const bot = new Bot(process.env.TEAMGAGA_BOT_TOKEN!);
+
+const me = await bot.api.getMe();
+
+await bot.api.sendMessage({
+  channelId: "channel-id",
+  content: `Hello from ${me.name}.`,
+});
+```
+
+Public API methods always use the newest documented endpoint for a feature and do not include version suffixes. For example, `bot.api.sendMessage(...)` calls `POST /bot/v2/messages`.
+
+## OAuth Example
+
+```ts
+import { OAuth } from "@teamgaga/open-api";
+
+const oauth = new OAuth({
+  appId: process.env.TEAMGAGA_APP_ID!,
+  appSecret: process.env.TEAMGAGA_APP_SECRET!,
 });
 
-const messages = await client.pollMessages();
-
-await client.sendMessage({
-  channelId: messages.im[0].channel_id,
-  content: "Hello from TeamGaga SDK.",
-  quoteId: messages.im[0].message_id,
+const token = await oauth.createToken({
+  grantType: "access_token",
+  code: "authorization-code",
 });
+
+const user = await oauth.getUser(token.access_token);
+const communities = await oauth.getCommunities(token.access_token);
+```
+
+## Error Handling
+
+```ts
+import { TeamGagaApiError } from "@teamgaga/open-api";
+
+try {
+  await bot.api.getMe();
+} catch (error) {
+  if (error instanceof TeamGagaApiError) {
+    console.error(error.status, error.code, error.requestId, error.message);
+  }
+}
 ```
 
 ## Release

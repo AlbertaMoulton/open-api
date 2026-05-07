@@ -26,7 +26,7 @@ test("OAuth createToken uses Oauth base credential auth", async () => {
 
   await oauth.createToken({ grantType: "access_token", code: "code" });
 
-  const [, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
+  const [, init] = fetchMock.mock.calls[0] as unknown as [URL, RequestInit];
 
   expect((init.headers as Headers).get("Authorization")).toBe("Oauth YXBwOnNlY3JldA==");
 });
@@ -49,7 +49,7 @@ test("OAuth getUser uses Access auth", async () => {
 
   await oauth.getUser("access-token");
 
-  const [, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
+  const [, init] = fetchMock.mock.calls[0] as unknown as [URL, RequestInit];
 
   expect((init.headers as Headers).get("Authorization")).toBe("Access access-token");
 });

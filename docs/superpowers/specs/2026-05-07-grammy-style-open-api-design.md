@@ -388,4 +388,3 @@ Required first-phase tests:
 - Whether `ctx.answerCallback` has a documented endpoint in the current API references. If not, it should be removed from phase one.
 - Whether `Authorization: Teamgaga Token <bot_token>` in `new_general.md` or `Authorization: Bot <bot_token>` in `index.md` is the canonical Bot API auth scheme. The implementation should verify this before coding.
 - Whether markdown messages should be treated as a distinct message type filter or only as a sending method. Phase one can support `message:text` first and add `message:markdown` only if incoming payloads identify it reliably.
-

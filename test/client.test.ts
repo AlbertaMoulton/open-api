@@ -48,7 +48,7 @@ test("Client serializes query params and bot auth header", async () => {
     query: { limit: 10, filter: ["im", "event"] },
   });
 
-  const [url, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
+  const [url, init] = fetchMock.mock.calls[0] as unknown as [URL, RequestInit];
 
   expect(url.toString()).toBe(
     "https://open.teamgaga.com/bot/v1/messages?limit=10&filter=im&filter=event",

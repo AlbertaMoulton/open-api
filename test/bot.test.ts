@@ -44,7 +44,7 @@ test("Bot polls updates and dispatches message contexts", async () => {
   await bot.start({ interval: 1, signal: abort.signal });
 
   expect(fetchMock).toHaveBeenCalledTimes(2);
-  expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(
+  expect((fetchMock.mock.calls[1] as unknown as [URL, RequestInit])[1].body).toBe(
     JSON.stringify({
       channel_id: "channel-1",
       content: "pong",

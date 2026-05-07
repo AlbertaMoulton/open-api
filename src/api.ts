@@ -156,7 +156,10 @@ export class Api {
     });
   }
 
-  getCommunityMembers(communityId: string, options: MemberListOptions = {}): Promise<ApiUserInfo[]> {
+  getCommunityMembers(
+    communityId: string,
+    options: MemberListOptions = {},
+  ): Promise<ApiUserInfo[]> {
     return this.client.request(`/bot/v1/communities/${encodeURIComponent(communityId)}/members`, {
       method: "GET",
       query: memberListQuery(options),
@@ -164,9 +167,12 @@ export class Api {
   }
 
   getCommunityMemberCount(communityId: string): Promise<number> {
-    return this.client.request(`/bot/v1/communities/${encodeURIComponent(communityId)}/members/count`, {
-      method: "GET",
-    });
+    return this.client.request(
+      `/bot/v1/communities/${encodeURIComponent(communityId)}/members/count`,
+      {
+        method: "GET",
+      },
+    );
   }
 
   getCommunityOwner(communityId: string): Promise<string> {

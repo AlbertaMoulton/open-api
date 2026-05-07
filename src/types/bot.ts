@@ -17,7 +17,12 @@ export type NextFunction = () => Promise<void>;
 export type Middleware<C extends Context = Context> = (
   ctx: C,
   next: NextFunction,
-) => unknown | Promise<unknown>;
+) => void | Promise<void>;
+
+export type MiddlewareRunner<C extends Context = Context> = (
+  ctx: C,
+  next?: NextFunction,
+) => void | Promise<void>;
 
 export type Filter<C extends Context = Context> = (ctx: C) => boolean;
 

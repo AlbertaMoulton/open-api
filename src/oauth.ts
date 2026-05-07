@@ -55,9 +55,5 @@ export class OAuth {
 }
 
 function base64(value: string): string {
-  if (typeof btoa === "function") {
-    return btoa(value);
-  }
-
-  return Buffer.from(value).toString("base64");
+  return btoa(value);
 }

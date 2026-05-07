@@ -41,7 +41,7 @@ test("getUpdates maps polling options to query params", async () => {
 
   await api.getUpdates({ limit: 5, allowedUpdates: ["message", "event"] });
 
-  const [url] = fetchMock.mock.calls[0] as [URL, RequestInit];
+  const [url] = fetchMock.mock.calls[0] as unknown as [URL, RequestInit];
 
   expect(url.toString()).toBe(
     "https://open.teamgaga.com/bot/v1/messages?limit=5&filter=im&filter=event",
@@ -54,10 +54,10 @@ test("community and role methods use documented paths", async () => {
   await api.getCommunity("community-1");
   await api.getCommunityRoleMembers("community-1", "role-1", { limit: 20, after: "cursor" });
 
-  expect((fetchMock.mock.calls[0] as [URL, RequestInit])[0].pathname).toBe(
+  expect((fetchMock.mock.calls[0] as unknown as [URL, RequestInit])[0].pathname).toBe(
     "/bot/v1/communities/community-1",
   );
-  expect((fetchMock.mock.calls[1] as [URL, RequestInit])[0].toString()).toBe(
+  expect((fetchMock.mock.calls[1] as unknown as [URL, RequestInit])[0].toString()).toBe(
     "https://open.teamgaga.com/bot/v1/communities/community-1/roles/role-1/members?limit=20&after=cursor",
   );
 });
@@ -75,10 +75,10 @@ test("moderation methods map camelCase params to documented fields", async () =>
     delRoleIds: ["role-2"],
   });
 
-  expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(
+  expect((fetchMock.mock.calls[0] as unknown as [URL, RequestInit])[1].body).toBe(
     JSON.stringify({ mute_time: 60, channel_id: "channel-1" }),
   );
-  expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(
+  expect((fetchMock.mock.calls[1] as unknown as [URL, RequestInit])[1].body).toBe(
     JSON.stringify({
       member_id: "user-1",
       add_role_ids: ["role-1"],

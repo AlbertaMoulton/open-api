@@ -36,6 +36,7 @@
 ## Task 1: Shared Client, Errors, and Types
 
 **Files:**
+
 - Create: `src/errors.ts`
 - Modify: `src/client.ts`
 - Modify: `src/types.ts`
@@ -61,7 +62,11 @@ test("Client unwraps successful TeamGaga envelopes", async () => {
       request_id: "request-id",
     }),
   );
-  const client = new Client({ token: "token", auth: "Bot", fetch: fetchMock as unknown as typeof fetch });
+  const client = new Client({
+    token: "token",
+    auth: "Bot",
+    fetch: fetchMock as unknown as typeof fetch,
+  });
 
   const result = await client.request<{ ok: boolean }>("/bot/v1/me", { method: "GET" });
 
@@ -76,7 +81,11 @@ test("Client serializes query params and bot auth header", async () => {
   const fetchMock = vi.fn(async () =>
     Response.json({ status: true, code: 1000, message: "Ok", data: [], request_id: "request-id" }),
   );
-  const client = new Client({ token: "token", auth: "Bot", fetch: fetchMock as unknown as typeof fetch });
+  const client = new Client({
+    token: "token",
+    auth: "Bot",
+    fetch: fetchMock as unknown as typeof fetch,
+  });
 
   await client.request("/bot/v1/messages", {
     method: "GET",
@@ -84,15 +93,27 @@ test("Client serializes query params and bot auth header", async () => {
   });
 
   const [url, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
-  expect(url.toString()).toBe("https://open.teamgaga.com/bot/v1/messages?limit=10&filter=im&filter=event");
+  expect(url.toString()).toBe(
+    "https://open.teamgaga.com/bot/v1/messages?limit=10&filter=im&filter=event",
+  );
   expect((init.headers as Headers).get("Authorization")).toBe("Bot token");
 });
 
 test("Client throws TeamGagaApiError for failed envelopes", async () => {
   const fetchMock = vi.fn(async () =>
-    Response.json({ status: false, code: 4001, message: "Nope", data: null, request_id: "request-id" }),
+    Response.json({
+      status: false,
+      code: 4001,
+      message: "Nope",
+      data: null,
+      request_id: "request-id",
+    }),
   );
-  const client = new Client({ token: "token", auth: "Bot", fetch: fetchMock as unknown as typeof fetch });
+  const client = new Client({
+    token: "token",
+    auth: "Bot",
+    fetch: fetchMock as unknown as typeof fetch,
+  });
 
   await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toMatchObject({
     name: "TeamGagaApiError",
@@ -105,11 +126,20 @@ test("Client throws TeamGagaApiError for failed envelopes", async () => {
 
 test("Client throws TeamGagaApiError for non-2xx HTTP responses", async () => {
   const fetchMock = vi.fn(async () =>
-    Response.json({ status: false, code: 5000, message: "Broken", data: null, request_id: "request-id" }, { status: 500 }),
+    Response.json(
+      { status: false, code: 5000, message: "Broken", data: null, request_id: "request-id" },
+      { status: 500 },
+    ),
   );
-  const client = new Client({ token: "token", auth: "Bot", fetch: fetchMock as unknown as typeof fetch });
+  const client = new Client({
+    token: "token",
+    auth: "Bot",
+    fetch: fetchMock as unknown as typeof fetch,
+  });
 
-  await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toBeInstanceOf(TeamGagaApiError);
+  await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toBeInstanceOf(
+    TeamGagaApiError,
+  );
 });
 ```
 
@@ -139,6 +169,7 @@ git commit -m "feat: add shared TeamGaga HTTP client"
 ## Task 2: Typed Bot Api Facade
 
 **Files:**
+
 - Create: `src/api.ts`
 - Modify: `src/types/api.ts`
 - Modify: `src/types/models.ts`
@@ -152,7 +183,13 @@ import { Api } from "../src/api";
 
 function createApi() {
   const fetchMock = vi.fn(async () =>
-    Response.json({ status: true, code: 1000, message: "Ok", data: { message_id: "message-1" }, request_id: "request-id" }),
+    Response.json({
+      status: true,
+      code: 1000,
+      message: "Ok",
+      data: { message_id: "message-1" },
+      request_id: "request-id",
+    }),
   );
   return {
     api: new Api("token", { fetch: fetchMock as unknown as typeof fetch }),
@@ -180,7 +217,9 @@ test("getUpdates maps polling options to query params", async () => {
   await api.getUpdates({ limit: 5, allowedUpdates: ["message", "event"] });
 
   const [url] = fetchMock.mock.calls[0] as [URL, RequestInit];
-  expect(url.toString()).toBe("https://open.teamgaga.com/bot/v1/messages?limit=5&filter=im&filter=event");
+  expect(url.toString()).toBe(
+    "https://open.teamgaga.com/bot/v1/messages?limit=5&filter=im&filter=event",
+  );
 });
 
 test("community and role methods use documented paths", async () => {
@@ -189,7 +228,9 @@ test("community and role methods use documented paths", async () => {
   await api.getCommunity("community-1");
   await api.getCommunityRoleMembers("community-1", "role-1", { limit: 20, after: "cursor" });
 
-  expect((fetchMock.mock.calls[0] as [URL, RequestInit])[0].pathname).toBe("/bot/v1/communities/community-1");
+  expect((fetchMock.mock.calls[0] as [URL, RequestInit])[0].pathname).toBe(
+    "/bot/v1/communities/community-1",
+  );
   expect((fetchMock.mock.calls[1] as [URL, RequestInit])[0].toString()).toBe(
     "https://open.teamgaga.com/bot/v1/communities/community-1/roles/role-1/members?limit=20&after=cursor",
   );
@@ -222,6 +263,7 @@ git commit -m "feat: add typed bot api facade"
 ## Task 3: Composer and Context
 
 **Files:**
+
 - Create: `src/composer.ts`
 - Create: `src/context.ts`
 - Create: `src/types/bot.ts`
@@ -315,6 +357,7 @@ git commit -m "feat: add composer and context"
 ## Task 4: Bot Runtime
 
 **Files:**
+
 - Modify: `src/bot.ts`
 - Test: `test/bot.test.ts`
 
@@ -334,20 +377,28 @@ test("Bot polls updates and dispatches message contexts", async () => {
         code: 1000,
         message: "Ok",
         data: {
-          im: [{
-            channel_id: "channel-1",
-            user_id: "user-1",
-            message_id: "message-1",
-            channel_type: 0,
-            content: "/ping",
-            created_at: "2026-05-07T00:00:00Z",
-          }],
+          im: [
+            {
+              channel_id: "channel-1",
+              user_id: "user-1",
+              message_id: "message-1",
+              channel_type: 0,
+              content: "/ping",
+              created_at: "2026-05-07T00:00:00Z",
+            },
+          ],
           event: [],
         },
         request_id: "request-id",
       });
     }
-    return Response.json({ status: true, code: 1000, message: "Ok", data: { message_id: "reply-1" }, request_id: "request-id" });
+    return Response.json({
+      status: true,
+      code: 1000,
+      message: "Ok",
+      data: { message_id: "reply-1" },
+      request_id: "request-id",
+    });
   });
 
   const bot = new Bot("token", { fetch: fetchMock as unknown as typeof fetch });
@@ -358,11 +409,13 @@ test("Bot polls updates and dispatches message contexts", async () => {
   await bot.start({ interval: 1, signal: abort.signal });
 
   expect(fetchMock).toHaveBeenCalledTimes(2);
-  expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({
-    channel_id: "channel-1",
-    content: "pong",
-    quote_id: "message-1",
-  }));
+  expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(
+    JSON.stringify({
+      channel_id: "channel-1",
+      content: "pong",
+      quote_id: "message-1",
+    }),
+  );
 });
 
 test("Bot catch handles middleware errors and continues polling batch", async () => {
@@ -375,8 +428,22 @@ test("Bot catch handles middleware errors and continues polling batch", async ()
       message: "Ok",
       data: {
         im: [
-          { channel_id: "c1", user_id: "u1", message_id: "m1", channel_type: 0, content: "first", created_at: "2026-05-07T00:00:00Z" },
-          { channel_id: "c2", user_id: "u2", message_id: "m2", channel_type: 0, content: "second", created_at: "2026-05-07T00:00:00Z" },
+          {
+            channel_id: "c1",
+            user_id: "u1",
+            message_id: "m1",
+            channel_type: 0,
+            content: "first",
+            created_at: "2026-05-07T00:00:00Z",
+          },
+          {
+            channel_id: "c2",
+            user_id: "u2",
+            message_id: "m2",
+            channel_type: 0,
+            content: "second",
+            created_at: "2026-05-07T00:00:00Z",
+          },
         ],
         event: [],
       },
@@ -425,6 +492,7 @@ git commit -m "feat: add grammY-style bot runtime"
 ## Task 5: OAuth Facade and Public Exports
 
 **Files:**
+
 - Create: `src/oauth.ts`
 - Modify: `src/index.ts`
 - Modify: `src/types/oauth.ts`
@@ -453,7 +521,11 @@ test("OAuth createToken uses Oauth base credential auth", async () => {
       request_id: "request-id",
     }),
   );
-  const oauth = new OAuth({ appId: "app", appSecret: "secret", fetch: fetchMock as unknown as typeof fetch });
+  const oauth = new OAuth({
+    appId: "app",
+    appSecret: "secret",
+    fetch: fetchMock as unknown as typeof fetch,
+  });
 
   await oauth.createToken({ grantType: "access_token", code: "code" });
 
@@ -463,9 +535,19 @@ test("OAuth createToken uses Oauth base credential auth", async () => {
 
 test("OAuth getUser uses Access auth", async () => {
   const fetchMock = vi.fn(async () =>
-    Response.json({ status: true, code: 1000, message: "Ok", data: { user_id: "user-1" }, request_id: "request-id" }),
+    Response.json({
+      status: true,
+      code: 1000,
+      message: "Ok",
+      data: { user_id: "user-1" },
+      request_id: "request-id",
+    }),
   );
-  const oauth = new OAuth({ appId: "app", appSecret: "secret", fetch: fetchMock as unknown as typeof fetch });
+  const oauth = new OAuth({
+    appId: "app",
+    appSecret: "secret",
+    fetch: fetchMock as unknown as typeof fetch,
+  });
 
   await oauth.getUser("access-token");
 
@@ -500,6 +582,7 @@ git commit -m "feat: add oauth facade and public exports"
 ## Task 6: README and Full Verification
 
 **Files:**
+
 - Modify: `README.md`
 
 - [ ] **Step 1: Update README**
@@ -525,4 +608,3 @@ git commit -m "docs: update sdk usage guide"
 - Intentional phase-one omission: `ctx.answerCallback` is not implemented unless a documented endpoint is confirmed.
 - Placeholder scan: No placeholder steps are required for execution; implementation choices are constrained by exact files, tests, and expected commands.
 - Type consistency: Public inputs use camelCase `Params`; server models keep documented snake_case response fields.
-
