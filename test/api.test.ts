@@ -36,6 +36,59 @@ test("sendMessage uses latest v2 endpoint without versioned method name", async 
   );
 });
 
+test("raw sendMessage accepts documented snake_case payload", async () => {
+  const { api, fetchMock } = createApi();
+
+  await api.raw.sendMessage({
+    channel_id: "channel-1",
+    content: "hello",
+  });
+
+  expect(fetchMock).toHaveBeenCalledWith(
+    new URL("https://open.teamgaga.com/bot/v2/messages"),
+    expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({
+        channel_id: "channel-1",
+        content: "hello",
+      }),
+    }),
+  );
+});
+
+test("Api transformers can observe and modify calls", async () => {
+  const { api, fetchMock } = createApi();
+  const seen: string[] = [];
+
+  api.use(async (prev, method, payload, signal) => {
+    seen.push(method);
+    return prev(
+      method,
+      {
+        ...payload,
+        content: "changed",
+      },
+      signal,
+    );
+  });
+
+  await api.raw.sendMessage({
+    channel_id: "channel-1",
+    content: "original",
+  });
+
+  expect(seen).toEqual(["sendMessage"]);
+  expect(fetchMock).toHaveBeenCalledWith(
+    new URL("https://open.teamgaga.com/bot/v2/messages"),
+    expect.objectContaining({
+      body: JSON.stringify({
+        channel_id: "channel-1",
+        content: "changed",
+      }),
+    }),
+  );
+});
+
 test("getUpdates maps polling options to query params", async () => {
   const { api, fetchMock } = createApi({ im: [], event: [] });
 

@@ -4,7 +4,7 @@
 
 **Goal:** Rebuild `@teamgaga/open-api` as a grammY-style TypeScript SDK with `Bot`, `Composer`, `Context`, typed `Api`, OAuth support, and unified errors.
 
-**Architecture:** `Api` and `OAuth` sit on a shared HTTP `Client`, while `Bot` owns an `Api` and dispatches polled updates through `Composer` middleware. `Context` wraps each update and provides grammY-like shortcuts such as `ctx.reply`.
+**Architecture:** `Api` and `OAuth` sit on an internal HTTP `ApiClient`, while `Bot` owns an `Api` and dispatches polled updates through `Composer` middleware. `Context` wraps each update and provides grammY-like shortcuts such as `ctx.reply`.
 
 **Tech Stack:** TypeScript ESM, vite-plus test runner, native `fetch`, Node 22.
 

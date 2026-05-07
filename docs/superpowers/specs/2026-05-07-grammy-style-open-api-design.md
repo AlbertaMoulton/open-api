@@ -58,9 +58,9 @@ await bot.start();
 
 `Api` is the public, typed facade over TeamGaga Bot API endpoints. It should use TypeScript-friendly camelCase parameter names while keeping returned server models close to the documented field names.
 
-### Client and Raw HTTP
+### Internal ApiClient and Raw HTTP
 
-The lower-level client handles base URL, auth headers, query strings, JSON bodies, multipart form data, response unwrapping, and error construction. It is an internal implementation detail by default. A raw escape hatch may exist later, but it must not be the primary public API.
+The lower-level `ApiClient` handles base URL, auth headers, query strings, JSON bodies, multipart form data, response unwrapping, and error construction. It is an internal implementation detail and must not be exported from the package entry point. The public low-level escape hatch should follow grammY's shape: `bot.api.raw` for documented payloads and `bot.api.use(...)` for API call transformers.
 
 ## Proposed File Layout
 
@@ -223,6 +223,21 @@ api.getMe();
 api.uploadImage(params);
 ```
 
+`Api` should also expose a grammY-style transformable raw layer:
+
+```ts
+api.raw.sendMessage({
+  channel_id: "channel-id",
+  content: "Hello",
+});
+
+api.use(async (prev, method, payload, signal) => {
+  return prev(method, payload, signal);
+});
+```
+
+`Client` or `ApiClient` must not be exported from `src/index.ts`.
+
 ## Endpoint Version Policy
 
 For the same feature, the public `Api` must use the latest documented endpoint version and expose an unversioned method name.
@@ -379,7 +394,6 @@ Required first-phase tests:
 
 ### Phase 3: Extension Points
 
-- Evaluate a public raw API escape hatch.
 - Add plugin conventions if real use cases emerge.
 - Consider webhook or custom update source support if TeamGaga adds or documents the capability.
 

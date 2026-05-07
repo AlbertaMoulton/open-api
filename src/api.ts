@@ -1,4 +1,4 @@
-import { Client } from "./client";
+import { ApiClient } from "./client";
 import type {
   AddMessageKeysParams,
   BanCommunityMemberParams,
@@ -32,16 +32,69 @@ export type ApiOptions = {
   fetch?: typeof fetch;
 };
 
+export type RawSendMessageParams = {
+  channel_id: string;
+  content: string;
+  quote_id?: string;
+  type?: number;
+  attachments?: unknown[];
+  ephemeral?: boolean;
+  user_ids?: string[];
+  disable_reactions?: boolean;
+  reactions?: unknown[];
+  richtext?: boolean;
+};
+
+export type RawApi = {
+  sendMessage(args: RawSendMessageParams, signal?: AbortSignal): Promise<SendMessageResponse>;
+};
+
+export type RawApiMethod = keyof RawApi;
+
+export type RawPayload<M extends RawApiMethod = RawApiMethod> = Parameters<RawApi[M]>[0];
+
+export type RawResult<M extends RawApiMethod = RawApiMethod> = Awaited<ReturnType<RawApi[M]>>;
+
+export type ApiCallFn = (
+  method: RawApiMethod,
+  payload: RawPayload,
+  signal?: AbortSignal,
+) => Promise<RawResult>;
+
+export type Transformer = (
+  prev: ApiCallFn,
+  method: RawApiMethod,
+  payload: RawPayload,
+  signal?: AbortSignal,
+) => Promise<RawResult>;
+
 export class Api {
-  private readonly client: Client;
+  readonly raw: RawApi;
+  readonly installedTransformers: Transformer[] = [];
+  private readonly client: ApiClient;
+  private call: ApiCallFn;
 
   constructor(token: string, options: ApiOptions = {}) {
-    this.client = new Client({
+    this.client = new ApiClient({
       token,
       auth: "Bot",
       baseUrl: options.baseUrl,
       fetch: options.fetch,
     });
+    this.call = this.callApi.bind(this);
+    this.raw = {
+      sendMessage: (args, signal) => this.call("sendMessage", args, signal),
+    };
+  }
+
+  use(...transformers: Transformer[]): this {
+    for (const transformer of transformers) {
+      const previous = this.call;
+      this.call = (method, payload, signal) => transformer(previous, method, payload, signal);
+    }
+
+    this.installedTransformers.push(...transformers);
+    return this;
   }
 
   getUpdates(options: GetUpdatesOptions = {}): Promise<PullMessageResponse> {
@@ -55,10 +108,7 @@ export class Api {
   }
 
   sendMessage(params: SendMessageParams): Promise<SendMessageResponse> {
-    return this.client.request("/bot/v2/messages", {
-      method: "POST",
-      body: messageBody(params),
-    });
+    return this.raw.sendMessage(messageBody(params));
   }
 
   sendBatchMessages(params: SendBatchMessagesParams): Promise<string[]> {
@@ -279,9 +329,35 @@ export class Api {
       },
     });
   }
+
+  private callApi(
+    method: RawApiMethod,
+    payload: RawPayload,
+    signal?: AbortSignal,
+  ): Promise<RawResult> {
+    return this.client.request<RawResult>(endpointFor(method), {
+      method: httpMethodFor(method),
+      body: payload,
+      signal,
+    });
+  }
 }
 
-function messageBody(params: SendMessageParams) {
+function endpointFor(method: RawApiMethod): string {
+  switch (method) {
+    case "sendMessage":
+      return "/bot/v2/messages";
+  }
+}
+
+function httpMethodFor(method: RawApiMethod): string {
+  switch (method) {
+    case "sendMessage":
+      return "POST";
+  }
+}
+
+function messageBody(params: SendMessageParams): RawSendMessageParams {
   return {
     channel_id: params.channelId,
     content: params.content,

@@ -51,6 +51,26 @@ await bot.api.sendMessage({
 
 Public API methods always use the newest documented endpoint for a feature and do not include version suffixes. For example, `bot.api.sendMessage(...)` calls `POST /bot/v2/messages`.
 
+## Raw API and Transformers
+
+`bot.api` is the friendly camelCase facade. For lower-level integrations, `bot.api.raw` exposes documented payload fields directly:
+
+```ts
+await bot.api.raw.sendMessage({
+  channel_id: "channel-id",
+  content: "Hello from the raw API.",
+});
+```
+
+API transformers can observe or modify calls before they are sent. This is useful for logging, rate limiting, retries, or metrics:
+
+```ts
+bot.api.use(async (prev, method, payload, signal) => {
+  console.log(method);
+  return prev(method, payload, signal);
+});
+```
+
 ## OAuth Example
 
 ```ts

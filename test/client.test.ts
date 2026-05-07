@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vite-plus/test";
-import { Client } from "../src/client";
+import { ApiClient } from "../src/client";
 import { TeamGagaApiError } from "../src/errors";
 
-test("Client unwraps successful TeamGaga envelopes", async () => {
+test("ApiClient unwraps successful TeamGaga envelopes", async () => {
   const fetchMock = vi.fn(async () =>
     Response.json({
       status: true,
@@ -12,7 +12,7 @@ test("Client unwraps successful TeamGaga envelopes", async () => {
       request_id: "request-id",
     }),
   );
-  const client = new Client({
+  const client = new ApiClient({
     token: "token",
     auth: "Bot",
     fetch: fetchMock as unknown as typeof fetch,
@@ -27,7 +27,7 @@ test("Client unwraps successful TeamGaga envelopes", async () => {
   );
 });
 
-test("Client serializes query params and bot auth header", async () => {
+test("ApiClient serializes query params and bot auth header", async () => {
   const fetchMock = vi.fn(async () =>
     Response.json({
       status: true,
@@ -37,7 +37,7 @@ test("Client serializes query params and bot auth header", async () => {
       request_id: "request-id",
     }),
   );
-  const client = new Client({
+  const client = new ApiClient({
     token: "token",
     auth: "Bot",
     fetch: fetchMock as unknown as typeof fetch,
@@ -56,7 +56,7 @@ test("Client serializes query params and bot auth header", async () => {
   expect((init.headers as Headers).get("Authorization")).toBe("Bot token");
 });
 
-test("Client throws TeamGagaApiError for failed envelopes", async () => {
+test("ApiClient throws TeamGagaApiError for failed envelopes", async () => {
   const fetchMock = vi.fn(async () =>
     Response.json({
       status: false,
@@ -66,7 +66,7 @@ test("Client throws TeamGagaApiError for failed envelopes", async () => {
       request_id: "request-id",
     }),
   );
-  const client = new Client({
+  const client = new ApiClient({
     token: "token",
     auth: "Bot",
     fetch: fetchMock as unknown as typeof fetch,
@@ -81,7 +81,7 @@ test("Client throws TeamGagaApiError for failed envelopes", async () => {
   });
 });
 
-test("Client throws TeamGagaApiError for non-2xx HTTP responses", async () => {
+test("ApiClient throws TeamGagaApiError for non-2xx HTTP responses", async () => {
   const fetchMock = vi.fn(async () =>
     Response.json(
       {
@@ -94,7 +94,7 @@ test("Client throws TeamGagaApiError for non-2xx HTTP responses", async () => {
       { status: 500 },
     ),
   );
-  const client = new Client({
+  const client = new ApiClient({
     token: "token",
     auth: "Bot",
     fetch: fetchMock as unknown as typeof fetch,

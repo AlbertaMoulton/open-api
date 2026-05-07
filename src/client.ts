@@ -8,18 +8,19 @@ export type QueryValue = string | number | boolean | null | undefined;
 
 export type QueryParams = Record<string, QueryValue | QueryValue[]>;
 
-export type ClientOptions = {
+export type ApiClientOptions = {
   token: string;
   auth: AuthScheme;
   baseUrl?: string;
   fetch?: typeof fetch;
 };
 
-export type ClientRequestOptions = {
+export type ApiClientRequestOptions = {
   method: string;
   query?: QueryParams;
   body?: unknown;
   headers?: HeadersInit;
+  signal?: AbortSignal;
 };
 
 type TeamGagaApiEnvelope<T> = {
@@ -30,20 +31,20 @@ type TeamGagaApiEnvelope<T> = {
   request_id?: string;
 };
 
-export class Client {
+export class ApiClient {
   private readonly token: string;
   private readonly auth: AuthScheme;
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
 
-  constructor(options: ClientOptions) {
+  constructor(options: ApiClientOptions) {
     this.token = options.token;
     this.auth = options.auth;
     this.baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
     this.fetchImpl = options.fetch ?? fetch;
   }
 
-  async request<T>(path: string | URL, options: ClientRequestOptions): Promise<T> {
+  async request<T>(path: string | URL, options: ApiClientRequestOptions): Promise<T> {
     const url = path instanceof URL ? path : new URL(path, this.baseUrl);
     appendQuery(url, options.query);
 
@@ -53,6 +54,7 @@ export class Client {
     const init: RequestInit = {
       method: options.method,
       headers,
+      signal: options.signal,
     };
 
     if (options.body !== undefined) {

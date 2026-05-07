@@ -1,4 +1,5 @@
 import { expect, test, vi } from "vite-plus/test";
+import * as openApi from "../src";
 import { Api, Bot, OAuth, TeamGagaApiError } from "../src";
 
 test("public exports include new primary classes", () => {
@@ -6,6 +7,7 @@ test("public exports include new primary classes", () => {
   expect(Api).toBeDefined();
   expect(OAuth).toBeDefined();
   expect(TeamGagaApiError).toBeDefined();
+  expect("Client" in openApi).toBe(false);
 });
 
 test("OAuth createToken uses Oauth base credential auth", async () => {

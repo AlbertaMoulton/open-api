@@ -1,4 +1,4 @@
-import { Client } from "./client";
+import { ApiClient } from "./client";
 import type { CreateTokenParams, OAuthOptions, TokenResponse } from "./types/oauth";
 import type { ApiUserInfo, Community } from "./types/models";
 
@@ -35,8 +35,8 @@ export class OAuth {
     return this.accessClient(accessToken).request("/v1/oauth/communities", { method: "GET" });
   }
 
-  private baseClient(): Client {
-    return new Client({
+  private baseClient(): ApiClient {
+    return new ApiClient({
       token: base64(`${this.appId}:${this.appSecret}`),
       auth: "Oauth",
       baseUrl: this.baseUrl,
@@ -44,8 +44,8 @@ export class OAuth {
     });
   }
 
-  private accessClient(accessToken: string): Client {
-    return new Client({
+  private accessClient(accessToken: string): ApiClient {
+    return new ApiClient({
       token: accessToken,
       auth: "Access",
       baseUrl: this.baseUrl,
