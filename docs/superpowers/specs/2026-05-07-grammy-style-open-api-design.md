@@ -172,7 +172,7 @@ ctx.answerCallback(data?);
 
 `ctx.reply` should send to the current channel and quote the current message when a message ID is available. Options should allow callers to override quote behavior and pass message fields such as attachments, reactions, ephemeral visibility, and rich text flags.
 
-`ctx.answerCallback` should be included only if the documented callback response endpoint is available in the implementation phase. If the docs do not provide enough endpoint detail, leave it out of phase one rather than guessing.
+`ctx.answerCallback` should not be included until a documented callback response endpoint is available. The current API references define callback event payloads, but they do not document how a bot should acknowledge or answer such callbacks.
 
 ## Public Api Facade
 
@@ -237,6 +237,8 @@ api.use(async (prev, method, payload, signal) => {
 ```
 
 `Client` or `ApiClient` must not be exported from `src/index.ts`.
+
+The raw layer should cover the Bot API methods implemented by the facade so transformers can observe both raw calls and facade calls.
 
 ## Endpoint Version Policy
 

@@ -4,7 +4,7 @@ export type AllowedUpdate = "message" | "event";
 
 export type GetUpdatesOptions = {
   limit?: number;
-  allowed_updates?: AllowedUpdate[];
+  filter?: Array<"im" | "event">;
 };
 
 export type SendMessageParams = {

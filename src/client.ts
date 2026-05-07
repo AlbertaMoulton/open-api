@@ -19,6 +19,7 @@ export type ApiClientRequestOptions = {
   method: string;
   query?: QueryParams;
   body?: unknown;
+  form_data?: FormData;
   headers?: HeadersInit;
   signal?: AbortSignal;
 };
@@ -57,7 +58,9 @@ export class ApiClient {
       signal: options.signal,
     };
 
-    if (options.body !== undefined) {
+    if (options.form_data !== undefined) {
+      init.body = options.form_data;
+    } else if (options.body !== undefined) {
       headers.set("Content-Type", "application/json");
       init.body = JSON.stringify(options.body);
     }

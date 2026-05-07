@@ -39,7 +39,7 @@ export class Bot extends Composer<Context> {
       try {
         const updates = await this.api.getUpdates({
           limit: polling.limit,
-          allowed_updates: polling.allowed_updates,
+          filter: polling.allowed_updates?.map((update) => (update === "message" ? "im" : "event")),
         });
 
         for (const update of toUpdates(updates)) {
