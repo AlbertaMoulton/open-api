@@ -111,10 +111,3 @@ export type BotInfo = {
   terms_of_service?: string;
   token?: string;
 };
-
-export type ImageUploadResponse = {
-  url: string;
-  path: string;
-  md5: string;
-  cloudfront_url?: string;
-};

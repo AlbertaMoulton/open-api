@@ -71,6 +71,8 @@ bot.api.use(async (prev, method, payload, signal) => {
 });
 ```
 
+For transformers that only target one method, use `MethodTransformer<"methodName">` to get exact payload and result types for that method.
+
 Callback events can be handled with `bot.on("event:Callback", ...)`. The SDK does not provide an `answerCallback` helper.
 
 ## OAuth Example

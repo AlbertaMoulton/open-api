@@ -1,6 +1,7 @@
 export {
   Api,
   type ApiCallFn,
+  type MethodTransformer,
   type ApiOptions,
   type RawApi,
   type RawApiMethod,

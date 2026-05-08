@@ -213,13 +213,12 @@ api.updateCommunityMemberRoles(communityId, params);
 api.getCommunityRoleMembers(communityId, roleId, options?);
 ```
 
-User, DM, bot, and image methods:
+User, DM, and bot methods:
 
 ```ts
 api.getUser(userId, options?);
 api.createDmChannel(userId);
 api.getMe();
-api.uploadImage(params);
 ```
 
 `Api` should also expose a grammY-style transformable raw layer:
@@ -238,6 +237,8 @@ api.use(async (prev, method, payload, signal) => {
 `Client` or `ApiClient` must not be exported from `src/index.ts`.
 
 The raw layer should cover the Bot API methods implemented by the facade so transformers can observe both raw calls and facade calls.
+
+Method-specific transformers should be typed with a helper such as `MethodTransformer<"sendMessage">` so plugin authors can opt into exact payload and result types for a single method.
 
 ## Endpoint Version Policy
 

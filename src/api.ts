@@ -14,7 +14,6 @@ import type {
   SendMessageResponse,
   SetMessageReactionParams,
   UpdateCommunityMemberRolesParams,
-  UploadImageParams,
 } from "./types/api";
 import type {
   ApiUserInfo,
@@ -23,7 +22,6 @@ import type {
   Community,
   CommunityRole,
   DMChannel,
-  ImageUploadResponse,
   PullMessageResponse,
 } from "./types/models";
 
@@ -76,7 +74,6 @@ export type RawGetCommunityRoleMembersParams = MemberListOptions & {
 };
 export type RawGetUserParams = GetUserOptions & { user_id: string };
 export type RawCreateDmChannelParams = { user_id: string };
-export type RawUploadImageParams = UploadImageParams;
 export type EmptyPayload = Record<string, never>;
 
 export type RawApi = {
@@ -116,7 +113,6 @@ export type RawApi = {
   getUser(args: RawGetUserParams, signal?: AbortSignal): Promise<ApiUserInfo>;
   createDmChannel(args: RawCreateDmChannelParams, signal?: AbortSignal): Promise<DMChannel>;
   getMe(args?: EmptyPayload, signal?: AbortSignal): Promise<BotInfo>;
-  uploadImage(args: RawUploadImageParams, signal?: AbortSignal): Promise<ImageUploadResponse>;
 };
 
 export type RawApiMethod = keyof RawApi;
@@ -126,6 +122,13 @@ export type RawPayload<M extends RawApiMethod = RawApiMethod> = Parameters<RawAp
 export type RawResult<M extends RawApiMethod = RawApiMethod> = Awaited<ReturnType<RawApi[M]>>;
 
 export type ApiCallFn = <M extends RawApiMethod>(
+  method: M,
+  payload: RawPayload<M>,
+  signal?: AbortSignal,
+) => Promise<RawResult<M>>;
+
+export type MethodTransformer<M extends RawApiMethod> = (
+  prev: ApiCallFn,
   method: M,
   payload: RawPayload<M>,
   signal?: AbortSignal,
@@ -180,7 +183,6 @@ export class Api {
       getUser: (args, signal) => this.rawCall("getUser", args, signal),
       createDmChannel: (args, signal) => this.rawCall("createDmChannel", args, signal),
       getMe: (args = {}, signal) => this.rawCall("getMe", args, signal),
-      uploadImage: (args, signal) => this.rawCall("uploadImage", args, signal),
     };
   }
 
@@ -321,10 +323,6 @@ export class Api {
     return this.raw.getMe();
   }
 
-  uploadImage(params: UploadImageParams): Promise<ImageUploadResponse> {
-    return this.raw.uploadImage(params);
-  }
-
   private rawCall<M extends RawApiMethod>(
     method: M,
     payload: RawPayload<M>,
@@ -348,7 +346,6 @@ type RawRequest = {
   method: string;
   query?: QueryParams;
   body?: unknown;
-  form_data?: FormData;
 };
 
 function requestFor(method: RawApiMethod, payload: RawPayload): RawRequest {
@@ -390,12 +387,19 @@ function requestFor(method: RawApiMethod, payload: RawPayload): RawRequest {
     }
     case "addMessageKeys":
       return { path: "/bot/v1/messages/keys", method: "POST", body: payload };
-    case "deleteMessageKey":
+    case "deleteMessageKey": {
+      const args = payload as DeleteMessageKeyParams;
       return {
         path: "/bot/v1/messages/keys",
         method: "DELETE",
-        query: payload as DeleteMessageKeyParams,
+        query: {
+          key: args.key,
+          member_id: args.member_id,
+          message_id: args.message_id,
+          channel_id: args.channel_id,
+        },
       };
+    }
     case "getCommunity": {
       const args = payload as RawGetCommunityParams;
       return {
@@ -500,8 +504,6 @@ function requestFor(method: RawApiMethod, payload: RawPayload): RawRequest {
     }
     case "getMe":
       return { path: "/bot/v1/me", method: "GET" };
-    case "uploadImage":
-      return { path: "/bot/v1/upload/image", method: "POST", form_data: imageFormData(payload) };
   }
 }
 
@@ -518,17 +520,6 @@ function messageBody(params: SendMessageParams): RawSendMessageParams {
     reactions: params.reactions,
     richtext: params.richtext,
   };
-}
-
-function imageFormData(payload: RawPayload): FormData {
-  const params = payload as RawUploadImageParams;
-  const form = new FormData();
-
-  if (params.file) form.append("file", params.file);
-  if (params.filename) form.append("filename", params.filename);
-  if (params.operations) form.append("operations", JSON.stringify(params.operations));
-
-  return form;
 }
 
 function withoutKeys<T extends Record<string, unknown>, K extends keyof T>(

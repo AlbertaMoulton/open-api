@@ -1,5 +1,11 @@
 import { expect, test, vi } from "vite-plus/test";
-import { Api, type RawSendMessageParams } from "../src/api";
+import {
+  Api,
+  type MethodTransformer,
+  type RawApi,
+  type RawPayload,
+  type Transformer,
+} from "../src/api";
 
 function createApi(data: unknown = { message_id: "message-1" }) {
   const fetchMock = vi.fn(async () =>
@@ -60,14 +66,20 @@ test("Api transformers can observe and modify calls", async () => {
   const { api, fetchMock } = createApi();
   const seen: string[] = [];
 
-  api.use(async (prev, method, payload, signal) => {
+  const transformer = (async (prev, method, payload, signal) => {
     seen.push(method);
     if (method === "sendMessage") {
-      return prev(method, { ...(payload as RawSendMessageParams), content: "changed" }, signal);
+      return (await prev(
+        "sendMessage",
+        { ...(payload as RawPayload<"sendMessage">), content: "changed" },
+        signal,
+      )) as never;
     }
 
     return prev(method, payload, signal);
-  });
+  }) as Transformer;
+
+  api.use(transformer);
 
   await api.raw.sendMessage({
     channel_id: "channel-1",
@@ -90,10 +102,12 @@ test("facade methods go through raw transformers", async () => {
   const { api } = createApi({ bot_id: "bot-1" });
   const seen: string[] = [];
 
-  api.use(async (prev, method, payload, signal) => {
+  const transformer: Transformer = async (prev, method, payload, signal) => {
     seen.push(method);
     return prev(method, payload, signal);
-  });
+  };
+
+  api.use(transformer);
 
   await api.getMe();
 
@@ -126,26 +140,11 @@ test("raw methods cover documented bot api paths", async () => {
   );
 });
 
-test("uploadImage sends multipart form data", async () => {
-  const { api, fetchMock } = createApi({ url: "https://cdn.example/image.png" });
-  const file = new Blob(["image"], { type: "image/png" });
+test("raw api does not expose uploadImage", () => {
+  const { api } = createApi();
 
-  await api.uploadImage({
-    file,
-    filename: "image.png",
-    operations: [{ operation: "resize", params: [100, 100] }],
-  });
-
-  const [, init] = fetchMock.mock.calls[0] as unknown as [URL, RequestInit];
-  const body = init.body as FormData;
-
-  expect(body).toBeInstanceOf(FormData);
-  expect(body.get("file")).toBeInstanceOf(File);
-  expect(body.get("filename")).toBe("image.png");
-  expect(body.get("operations")).toBe(
-    JSON.stringify([{ operation: "resize", params: [100, 100] }]),
-  );
-  expect((init.headers as Headers).has("Content-Type")).toBe(false);
+  expect("uploadImage" in api).toBe(false);
+  expect("uploadImage" in api.raw).toBe(false);
 });
 
 test("getUpdates maps polling options to query params", async () => {
@@ -196,5 +195,105 @@ test("moderation methods pass documented snake_case params through", async () =>
       add_role_ids: ["role-1"],
       del_role_ids: ["role-2"],
     }),
+  );
+});
+
+test("raw api method types stay aligned with documented payloads", () => {
+  const raw: Pick<RawApi, "sendMessage" | "getCommunityMembers"> = {} as RawApi;
+  const sendMessageTransformer: MethodTransformer<"sendMessage"> = async (
+    prev,
+    method,
+    payload,
+    signal,
+  ) => prev(method, { ...payload, content: "typed" }, signal);
+  const messagePayload: RawPayload<"sendMessage"> = {
+    channel_id: "channel-1",
+    content: "hello",
+  };
+  const membersPayload: RawPayload<"getCommunityMembers"> = {
+    community_id: "community-1",
+    limit: 20,
+  };
+
+  expect(raw).toBeDefined();
+  expect(sendMessageTransformer).toBeDefined();
+  expect(messagePayload.channel_id).toBe("channel-1");
+  expect(membersPayload.community_id).toBe("community-1");
+});
+
+test("raw endpoint matrix covers current bot api surface", async () => {
+  const { api, fetchMock } = createApi([]);
+
+  await api.raw.sendBatchMessages({ items: [] });
+  await api.raw.sendMarkdownMessage({ channel_id: "channel-1", content: "**hello**" });
+  await api.raw.editMessage({
+    message_id: "message-1",
+    channel_id: "channel-1",
+    content: "edited",
+  });
+  await api.raw.setMessageReaction({
+    channel_id: "channel-1",
+    message_id: "message-1",
+    enable: true,
+    name: "like",
+  });
+  await api.raw.addMessageKeys({
+    channel_id: "channel-1",
+    keys: ["slot"],
+    member_id: "user-1",
+    message_id: "message-1",
+  });
+  await api.raw.deleteMessageKey({
+    channel_id: "channel-1",
+    key: "slot",
+    member_id: "user-1",
+    message_id: "message-1",
+  });
+  await api.raw.getCommunityChannels({ community_id: "community-1" });
+  await api.raw.getCommunityMemberCount({ community_id: "community-1" });
+  await api.raw.getCommunityOwner({ community_id: "community-1" });
+  await api.raw.banCommunityMember({ community_id: "community-1", user_id: "user-1" });
+  await api.raw.muteCommunityMember({
+    community_id: "community-1",
+    user_id: "user-1",
+    mute_time: 60,
+  });
+  await api.raw.unmuteCommunityMember({ community_id: "community-1", user_id: "user-1" });
+  await api.raw.getCommunityRoles({ community_id: "community-1" });
+  await api.raw.updateCommunityMemberRoles({
+    community_id: "community-1",
+    member_id: "user-1",
+    add_role_ids: ["role-1"],
+  });
+  await api.raw.getUser({ user_id: "user-1", community_id: "community-1" });
+  await api.raw.createDmChannel({ user_id: "user-1" });
+  await api.raw.getMe();
+
+  const calls = fetchMock.mock.calls as unknown as Array<[URL, RequestInit]>;
+
+  expect(calls.map(([url, init]) => `${init.method} ${url.pathname}`)).toEqual([
+    "POST /bot/v1/messages/batch",
+    "POST /bot/v1/md_messages",
+    "PATCH /bot/v1/messages/message-1",
+    "PATCH /bot/v1/channels/channel-1/messages/message-1/reaction",
+    "POST /bot/v1/messages/keys",
+    "DELETE /bot/v1/messages/keys",
+    "GET /bot/v1/communities/community-1/channels",
+    "GET /bot/v1/communities/community-1/members/count",
+    "GET /bot/v1/communities/community-1/owner",
+    "POST /bot/v1/communities/community-1/ban",
+    "POST /bot/v1/communities/community-1/members/user-1/mute",
+    "DELETE /bot/v1/communities/community-1/members/user-1/mute",
+    "GET /bot/v1/communities/community-1/roles",
+    "PATCH /bot/v1/communities/community-1/roles",
+    "GET /bot/v1/users/user-1",
+    "POST /bot/v1/users/user-1/dm",
+    "GET /bot/v1/me",
+  ]);
+  expect(calls[5]?.[0].toString()).toBe(
+    "https://open.teamgaga.com/bot/v1/messages/keys?key=slot&member_id=user-1&message_id=message-1&channel_id=channel-1",
+  );
+  expect(calls[14]?.[0].toString()).toBe(
+    "https://open.teamgaga.com/bot/v1/users/user-1?community_id=community-1",
   );
 });

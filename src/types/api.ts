@@ -89,14 +89,3 @@ export type UpdateCommunityMemberRolesParams = {
 export type GetUserOptions = {
   community_id?: string;
 };
-
-export type ImageOperation = {
-  operation: string;
-  params: unknown[];
-};
-
-export type UploadImageParams = {
-  file?: Blob;
-  filename?: string;
-  operations?: ImageOperation[];
-};
