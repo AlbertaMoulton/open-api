@@ -38,8 +38,8 @@
   "scripts": {
     "ready": "pnpm run check && pnpm run test && pnpm run build",
     "build": "vp pack",
-    "check": "vp check README.md src test docs/superpowers package.json tsconfig.json vite.config.ts",
-    "check:fix": "vp check --fix README.md src test docs/superpowers package.json tsconfig.json vite.config.ts",
+    "check": "vp check README.md src test docs/superpowers docs/sdk package.json tsconfig.json vite.config.ts",
+    "check:fix": "vp check --fix README.md src test docs/superpowers docs/sdk package.json tsconfig.json vite.config.ts",
     "dev": "vp pack --watch",
     "fmt": "vp fmt . --write",
     "fmt:check": "vp fmt --check",
