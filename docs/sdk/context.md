@@ -139,15 +139,3 @@ bot.on("message:text", async (ctx) => {
 ```
 
 如果某个 middleware 不调用 `next()`，后续 middleware 不会继续执行。
-
-## 不提供的上下文能力
-
-当前 SDK 不提供以下 grammY 中常见的上下文能力：
-
-- `ctx.has(...)`
-- `ctx.match`
-- `ctx.callbackQuery`
-- `ctx.answerCallback`
-- session 或 conversation 相关字段
-
-这些能力不会被假装存在。需要时应基于当前 `ctx.message`、`ctx.event` 和 `ctx.api` 自行组合。
