@@ -167,4 +167,4 @@ const bot = new Bot("token", {
 
 ## 错误
 
-API 返回非 2xx 或业务 envelope 的 `status` 为 `false` 时，会抛出 `ApiError`。详见 [错误处理](./errors.md)。
+API 返回非 2xx 或业务 envelope 的 `status` 为 `false` 时，会抛出 `ApiError`。详见 [错误处理](./errors)。
