@@ -61,8 +61,6 @@ await bot.api.sendMessage({
 });
 ```
 
-`sendMessage` 会调用最新版本的接口：`POST /bot/v2/messages`。公开方法名不带版本号。
-
 如果你在消息处理函数中回复当前频道，可以直接使用 `ctx.reply`：
 
 ```ts

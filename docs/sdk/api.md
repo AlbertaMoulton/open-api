@@ -30,27 +30,6 @@ await bot.api.sendMessage({
 
 方法名使用 JavaScript 风格，例如 `sendMessage`、`getCommunityMembers`。对象字段使用接口文档风格，例如 `channel_id`、`message_id`。
 
-## 最新版本策略
-
-如果同一个功能在接口文档中同时存在 v1 和 v2，公开方法使用最新版本且方法名不带版本号。
-
-当前最重要的例子是：
-
-```ts
-await bot.api.sendMessage({
-  channel_id: "channel-id",
-  content: "hello",
-});
-```
-
-它调用的是：
-
-```text
-POST /bot/v2/messages
-```
-
-SDK 不提供 `sendMessageV1` 或 `sendMessageV2` 这样的公开方法。
-
 ## 当前已接入的方法
 
 消息相关：

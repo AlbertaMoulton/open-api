@@ -49,8 +49,6 @@ await bot.api.sendMessage({
 });
 ```
 
-Public API methods always use the newest documented endpoint for a feature and do not include version suffixes. For example, `bot.api.sendMessage(...)` calls `POST /bot/v2/messages`.
-
 ## Raw API and Transformers
 
 `bot.api` is the friendly method facade. For lower-level integrations, `bot.api.raw` exposes documented payload fields directly:
