@@ -590,8 +590,7 @@ date: "2025-07-08"
 | 字段 | 类型 | 必填 | 描述 |
 |------|------|------|------|
 | enable | boolean | 是 | 启用/禁用 |
-| name | string | 否 | 表情名称（二选一） |
-| avatar | string | 否 | 表情图片（二选一） |
+| name | string | 否 | 表情名称 |
 
 ## AddKeysReq
 

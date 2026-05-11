@@ -93,7 +93,6 @@ export class Context {
       {
         enable: reaction.enable ?? true,
         name: reaction.name,
-        avatar: reaction.avatar,
       },
     );
   }

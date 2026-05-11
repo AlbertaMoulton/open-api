@@ -47,7 +47,6 @@ export type EditMessageParams = {
 export type SetMessageReactionParams = {
   enable: boolean;
   name?: string;
-  avatar?: string;
 };
 
 export type AddMessageKeysParams = {

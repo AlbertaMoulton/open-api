@@ -13,16 +13,7 @@ await bot.api.setMessageReaction("channel-id", "message-id", {
 });
 ```
 
-如果反应使用图片，可以传入 `avatar`：
-
-```ts
-await bot.api.setMessageReaction("channel-id", "message-id", {
-  enable: true,
-  avatar: "https://example.com/reaction.png",
-});
-```
-
-`name` 和 `avatar` 的具体取值规则以开放平台接口为准。SDK 会按字段原样发送。
+`name` 的具体取值规则以开放平台接口为准。SDK 会按字段原样发送。
 
 ## 使用 ctx.react
 

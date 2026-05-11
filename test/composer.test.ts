@@ -3,7 +3,10 @@ import { Composer } from "../src/composer";
 import { Context } from "../src/context";
 
 function createContext(content = "/ping hello") {
-  const api = { sendMessage: vi.fn(async () => ({ message_id: "reply-1" })) };
+  const api = {
+    sendMessage: vi.fn(async () => ({ message_id: "reply-1" })),
+    setMessageReaction: vi.fn(async () => undefined),
+  };
   const ctx = new Context({
     update: {
       type: "message",
@@ -65,5 +68,18 @@ test("Context reply quotes current message", async () => {
     channel_id: "channel-1",
     content: "pong",
     quote_id: "message-1",
+  });
+});
+
+test("Context react sends supported reaction fields", async () => {
+  const { ctx, api } = createContext("like");
+
+  await ctx.react({ name: "like" });
+
+  expect(api.setMessageReaction).toHaveBeenCalledTimes(1);
+  const [, , params] = api.setMessageReaction.mock.calls[0] as unknown as [string, string, unknown];
+  expect(params).toStrictEqual({
+    enable: true,
+    name: "like",
   });
 });
