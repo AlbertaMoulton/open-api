@@ -43,7 +43,7 @@ bot.command("ping", async (ctx) => {
   await ctx.reply("pong");
 });
 
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   await ctx.reply(`You said: ${ctx.text}`);
 });
 
@@ -117,8 +117,6 @@ First-phase filters:
 
 ```ts
 "message";
-"message:text";
-"message:markdown";
 "event";
 "event:Reaction";
 "event:Join";
@@ -372,7 +370,7 @@ Required first-phase tests:
 - Each `Api` method sends the correct HTTP method, path, query, body, and auth header.
 - `api.sendMessage` calls `POST /bot/v2/messages`.
 - `Bot.start()` converts polled messages and events into `Context` objects.
-- `Composer` dispatches `message`, `message:text`, `event:*`, and `command` filters correctly.
+- `Composer` dispatches `message`, `event:*`, and `command` filters correctly.
 - Middleware order and `next()` behavior match the documented model.
 - `Context` convenience methods call the expected `Api` methods.
 - API envelope failures throw `ApiError` with code, status, message, and request ID.
@@ -402,4 +400,4 @@ Required first-phase tests:
 ## Open Questions
 
 - Whether `Authorization: Teamgaga Token <bot_token>` in `new_general.md` or `Authorization: Bot <bot_token>` in `index.md` is the canonical Bot API auth scheme. The implementation should verify this before coding.
-- Whether markdown messages should be treated as a distinct message type filter or only as a sending method. Phase one can support `message:text` first and add `message:markdown` only if incoming payloads identify it reliably.
+- Whether markdown messages should be treated only as a sending method or whether incoming payloads expose enough stable metadata for a future custom filter.

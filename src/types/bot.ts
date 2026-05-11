@@ -26,12 +26,7 @@ export type MiddlewareRunner<C extends Context = Context> = (
 
 export type Filter<C extends Context = Context> = (ctx: C) => boolean;
 
-export type ComposerFilter =
-  | "message"
-  | "message:text"
-  | "message:markdown"
-  | "event"
-  | `event:${string}`;
+export type ComposerFilter = "message" | "event" | `event:${string}`;
 
 export type BotOptions = {
   base_url?: string;

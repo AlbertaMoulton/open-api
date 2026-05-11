@@ -71,14 +71,14 @@ bot.command("ban", async (ctx) => {
 
 ## 命令与 bot.on 的关系
 
-`bot.command` 是一种带条件的 middleware。它可以和 `bot.on("message:text")` 一起使用。
+`bot.command` 是一种带条件的 middleware。它可以和 `bot.on("message")` 一起使用。
 
 ```ts
 bot.command("help", async (ctx) => {
   await ctx.reply("可用命令：/help /ping");
 });
 
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   if (ctx.text?.startsWith("/")) return;
   await ctx.reply("普通文本消息");
 });

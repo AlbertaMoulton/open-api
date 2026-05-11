@@ -88,7 +88,7 @@ test("Bot catch handles middleware errors and continues polling batch", async ()
   const bot = new Bot("token", { fetch: fetchMock as unknown as typeof fetch });
   const errors: unknown[] = [];
   const seen: string[] = [];
-  bot.on("message:text", (ctx) => {
+  bot.on("message", (ctx) => {
     seen.push(ctx.text ?? "");
     if (ctx.text === "first") throw new Error("boom");
   });

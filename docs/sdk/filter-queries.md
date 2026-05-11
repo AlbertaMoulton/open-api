@@ -6,8 +6,6 @@
 
 ```ts
 bot.on("message", handler);
-bot.on("message:text", handler);
-bot.on("message:markdown", handler);
 bot.on("event", handler);
 bot.on("event:Reaction", handler);
 bot.on("event:Join", handler);
@@ -27,23 +25,15 @@ bot.on("message", async (ctx) => {
 });
 ```
 
-处理有文本内容的消息：
+处理有文本内容的消息时，在 `"message"` 回调里检查 `ctx.text`：
 
 ```ts
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
+  if (!ctx.text) return;
+
   await ctx.reply(`文本内容：${ctx.text}`);
 });
 ```
-
-处理 Markdown 类型消息：
-
-```ts
-bot.on("message:markdown", async (ctx) => {
-  console.log(ctx.message);
-});
-```
-
-当前 `message:markdown` 的判断依据是消息对象的 `type === 15`。如果服务端后续调整消息类型定义，应同步更新 SDK。
 
 ## 事件 filter
 
@@ -106,8 +96,10 @@ bot.use(async (ctx, next) => {
   await next();
 });
 
-bot.on("message:text", async (ctx, next) => {
-  console.log("只有文本消息经过这里");
+bot.on("message", async (ctx, next) => {
+  if (ctx.text) {
+    console.log("文本消息经过这里");
+  }
   await next();
 });
 

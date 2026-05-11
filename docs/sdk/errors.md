@@ -47,7 +47,7 @@ bot.catch((error, ctx) => {
 `Bot` 会把每个 update 转成独立的 `Context` 并逐个处理。如果某个 update 的 middleware 抛错，且你注册了 `bot.catch`，SDK 会调用错误处理器，然后继续处理同一批次里的后续 update。
 
 ```ts
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   if (ctx.text === "boom") {
     throw new Error("broken message");
   }

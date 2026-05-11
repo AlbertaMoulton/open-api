@@ -29,7 +29,7 @@ await bot.api.setMessageReaction("channel-id", "message-id", {
 在消息处理函数中，你通常可以直接对当前消息表态：
 
 ```ts
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   if (ctx.text === "赞") {
     await ctx.react({ name: "like" });
   }

@@ -21,7 +21,7 @@ bot.command("ping", async (ctx) => {
   await ctx.reply("pong");
 });
 
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   if (ctx.text === "roll") {
     const point = Math.floor(Math.random() * 6) + 1;
     await ctx.reply(`You rolled ${point}.`);

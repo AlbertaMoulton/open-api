@@ -30,10 +30,12 @@ bot.on("message", async (ctx) => {
 });
 ```
 
-如果只关心文本消息，可以使用更精确的 filter：
+如果只关心文本消息，可以在消息回调中检查 `ctx.text`：
 
 ```ts
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
+  if (!ctx.text) return;
+
   console.log(ctx.text);
 });
 ```
@@ -64,7 +66,9 @@ await bot.api.sendMessage({
 如果你在消息处理函数中回复当前频道，可以直接使用 `ctx.reply`：
 
 ```ts
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
+  if (!ctx.text) return;
+
   await ctx.reply(`收到：${ctx.text}`);
 });
 ```
@@ -76,7 +80,7 @@ bot.on("message:text", async (ctx) => {
 默认情况下，`ctx.reply` 会把当前消息的 `message_id` 作为 `quote_id`，也就是回复当前消息。
 
 ```ts
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   await ctx.reply("这是对当前消息的回复");
 });
 ```
@@ -108,7 +112,7 @@ await bot.api.sendMarkdownMessage({
   content: "**上线完成**",
 });
 
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   await ctx.replyMarkdown("**收到**");
 });
 ```
@@ -117,5 +121,5 @@ bot.on("message:text", async (ctx) => {
 
 - 对象参数字段使用下划线，例如 `channel_id`、`quote_id`、`user_ids`。
 - `ctx.reply` 需要当前 update 中存在 `channel_id`，否则会抛出错误。
-- 当前 SDK 没有 `hears` 方法；如果要做文本匹配，请使用 `bot.on("message:text", ...)` 后在回调中判断 `ctx.text`。
+- 当前 SDK 没有 `hears` 方法；如果要做文本匹配，请使用 `bot.on("message", ...)` 后在回调中判断 `ctx.text`。
 - 当前 SDK 没有 webhook runner；所有示例都基于 `bot.start()` 轮询。

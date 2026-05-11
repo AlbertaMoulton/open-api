@@ -34,7 +34,7 @@ ctx.text;
 示例：
 
 ```ts
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   console.log(ctx.userId, ctx.channelId, ctx.text);
   await ctx.reply("已收到");
 });
@@ -106,7 +106,7 @@ bot.on("message", async (ctx) => {
 });
 ```
 
-推荐优先使用更精确的 filter，例如 `message:text`、`event:Reaction`，减少手写判断。
+推荐优先使用明确的 filter，例如 `message`、`event:Reaction`；文本内容可以在回调中通过 `ctx.text` 判断。
 
 ## 上下文对象是如何被创造的
 
@@ -133,7 +133,7 @@ bot.use(async (ctx, next) => {
   console.log("after");
 });
 
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   await ctx.reply("handled");
 });
 ```

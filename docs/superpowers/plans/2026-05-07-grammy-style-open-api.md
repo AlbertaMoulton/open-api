@@ -305,10 +305,10 @@ test("Composer dispatches command middleware", async () => {
   expect(handler).toHaveBeenCalledWith(ctx, expect.any(Function));
 });
 
-test("Composer dispatches message:text filters", async () => {
+test("Composer dispatches message filters", async () => {
   const composer = new Composer();
   const handler = vi.fn();
-  composer.on("message:text", handler);
+  composer.on("message", handler);
   const { ctx } = createContext("plain text");
 
   await composer.middleware()(ctx);
@@ -451,7 +451,7 @@ test("Bot catch handles middleware errors and continues polling batch", async ()
   const bot = new Bot("token", { fetch: fetchMock as unknown as typeof fetch });
   const errors: unknown[] = [];
   const seen: string[] = [];
-  bot.on("message:text", (ctx) => {
+  bot.on("message", (ctx) => {
     seen.push(ctx.text ?? "");
     if (ctx.text === "first") throw new Error("boom");
   });

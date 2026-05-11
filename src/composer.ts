@@ -79,15 +79,6 @@ function filterFromName<C extends Context>(filter: ComposerFilter): Filter<C> {
     return (ctx) => ctx.update.type === "message";
   }
 
-  if (filter === "message:text") {
-    return (ctx) =>
-      ctx.update.type === "message" && typeof ctx.text === "string" && ctx.text.length > 0;
-  }
-
-  if (filter === "message:markdown") {
-    return (ctx) => ctx.update.type === "message" && ctx.message?.type === 15;
-  }
-
   if (filter === "event") {
     return (ctx) => ctx.update.type === "event";
   }

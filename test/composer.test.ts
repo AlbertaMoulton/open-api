@@ -33,10 +33,10 @@ test("Composer dispatches command middleware", async () => {
   expect(handler).toHaveBeenCalledWith(ctx, expect.any(Function));
 });
 
-test("Composer dispatches message:text filters", async () => {
+test("Composer dispatches message filters", async () => {
   const composer = new Composer();
   const handler = vi.fn();
-  composer.on("message:text", handler);
+  composer.on("message", handler);
   const { ctx } = createContext("plain text");
 
   await composer.middleware()(ctx);
