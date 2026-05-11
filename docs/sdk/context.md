@@ -70,7 +70,7 @@ await ctx.api.sendMessage({
 
 ## 通过 Has Checks 进行检测
 
-grammY 文档中常提到 “has checks”：先确认上下文里是否存在某类数据，再安全访问。当前 SDK 没有内置 `ctx.has(...)` 类型守卫方法，但你可以用普通 TypeScript 条件判断完成同样的事。
+先确认上下文里是否存在某类数据，再安全访问。当前 SDK 没有内置 `ctx.has(...)` 类型守卫方法，但你可以用普通 TypeScript 条件判断完成同样的事。
 
 判断当前 update 是否是消息：
 
