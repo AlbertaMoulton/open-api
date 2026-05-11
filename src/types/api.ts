@@ -44,9 +44,71 @@ export type EditMessageParams = {
   attachments?: Attachment[];
 };
 
+export type ReactionName =
+  | "ok"
+  | "thumbs_up"
+  | "hand_ok"
+  | "applause"
+  | "fist_bump"
+  | "plus_one"
+  | "get"
+  | "blush"
+  | "laugh"
+  | "smile"
+  | "support"
+  | "whimper"
+  | "obsessed"
+  | "show_off"
+  | "adoration"
+  | "tongue"
+  | "terror"
+  | "sob"
+  | "toasted"
+  | "angry"
+  | "apathy"
+  | "lol"
+  | "disbelief"
+  | "kiss"
+  | "scrunch"
+  | "dizzy"
+  | "sleep"
+  | "strive"
+  | "shocked"
+  | "phone_frustrated"
+  | "facepalm"
+  | "hug"
+  | "see_no_evil"
+  | "speak_no_evil"
+  | "hear_no_evil"
+  | "disapproval"
+  | "thumbs_down"
+  | "watermelon"
+  | "rose"
+  | "heart"
+  | "confetti"
+  | "clown"
+  | "monster"
+  | "flame"
+  | "rainbow"
+  | "poop"
+  | "check_mark"
+  | "cross_mark"
+  | "100"
+  | "eyes"
+  | "yes"
+  | "no"
+  | "number_1"
+  | "number_2"
+  | "number_3"
+  | "number_4"
+  | "option_A"
+  | "option_B"
+  | "option_C"
+  | "option_D";
+
 export type SetMessageReactionParams = {
   enable: boolean;
-  name?: string;
+  name?: ReactionName;
 };
 
 export type AddMessageKeysParams = {

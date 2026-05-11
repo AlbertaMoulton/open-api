@@ -9,11 +9,21 @@
 ```ts
 await bot.api.setMessageReaction("channel-id", "message-id", {
   enable: true,
-  name: "like",
+  name: "thumbs_up",
 });
 ```
 
-`name` 的具体取值规则以开放平台接口为准。SDK 会按字段原样发送。
+`name` 需要使用 SDK 支持的表态名称：
+
+```text
+ok, thumbs_up, hand_ok, applause, fist_bump, plus_one, get, blush, laugh, smile,
+support, whimper, obsessed, show_off, adoration, tongue, terror, sob, toasted,
+angry, apathy, lol, disbelief, kiss, scrunch, dizzy, sleep, strive, shocked,
+phone_frustrated, facepalm, hug, see_no_evil, speak_no_evil, hear_no_evil,
+disapproval, thumbs_down, watermelon, rose, heart, confetti, clown, monster,
+flame, rainbow, poop, check_mark, cross_mark, 100, eyes, yes, no, number_1,
+number_2, number_3, number_4, option_A, option_B, option_C, option_D
+```
 
 ## 使用 ctx.react
 
@@ -22,7 +32,7 @@ await bot.api.setMessageReaction("channel-id", "message-id", {
 ```ts
 bot.on("message", async (ctx) => {
   if (ctx.text === "赞") {
-    await ctx.react({ name: "like" });
+    await ctx.react({ name: "thumbs_up" });
   }
 });
 ```
@@ -34,7 +44,7 @@ bot.on("message", async (ctx) => {
 ```ts
 await ctx.api.setMessageReaction(ctx.channelId!, ctx.messageId!, {
   enable: true,
-  name: "like",
+  name: "thumbs_up",
 });
 ```
 
@@ -45,7 +55,7 @@ await ctx.api.setMessageReaction(ctx.channelId!, ctx.messageId!, {
 ```ts
 await ctx.react({
   enable: false,
-  name: "like",
+  name: "thumbs_up",
 });
 ```
 
@@ -54,7 +64,7 @@ await ctx.react({
 ```ts
 await bot.api.setMessageReaction("channel-id", "message-id", {
   enable: false,
-  name: "like",
+  name: "thumbs_up",
 });
 ```
 
@@ -78,7 +88,7 @@ bot.on("event:Reaction", async (ctx) => {
 bot.on("event", async (ctx) => {
   // 不推荐：普通事件未必有 message_id
   if (ctx.messageId) {
-    await ctx.react({ name: "like" });
+    await ctx.react({ name: "thumbs_up" });
   }
 });
 ```
@@ -87,6 +97,6 @@ bot.on("event", async (ctx) => {
 
 ```ts
 bot.on("message", async (ctx) => {
-  await ctx.react({ name: "seen" });
+  await ctx.react({ name: "ok" });
 });
 ```

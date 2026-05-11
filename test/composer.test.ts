@@ -1,6 +1,7 @@
 import { expect, test, vi } from "vite-plus/test";
 import { Composer } from "../src/composer";
 import { Context } from "../src/context";
+import type { SetMessageReactionParams } from "../src/types/api";
 
 function createContext(content = "/ping hello") {
   const api = {
@@ -72,14 +73,27 @@ test("Context reply quotes current message", async () => {
 });
 
 test("Context react sends supported reaction fields", async () => {
-  const { ctx, api } = createContext("like");
+  const { ctx, api } = createContext("thumbs_up");
 
-  await ctx.react({ name: "like" });
+  await ctx.react({ name: "thumbs_up" });
 
   expect(api.setMessageReaction).toHaveBeenCalledTimes(1);
   const [, , params] = api.setMessageReaction.mock.calls[0] as unknown as [string, string, unknown];
   expect(params).toStrictEqual({
     enable: true,
-    name: "like",
+    name: "thumbs_up",
   });
+});
+
+test("SetMessageReactionParams name is limited to supported reactions", () => {
+  const okReaction: SetMessageReactionParams = { enable: true, name: "ok" };
+  const optionReaction: SetMessageReactionParams = { enable: true, name: "option_D" };
+  // @ts-expect-error Unsupported reaction names should be rejected by TypeScript.
+  const unsupportedReaction: SetMessageReactionParams = { enable: true, name: "custom" };
+
+  expect([okReaction.name, optionReaction.name, unsupportedReaction.name]).toEqual([
+    "ok",
+    "option_D",
+    "custom",
+  ]);
 });

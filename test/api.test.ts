@@ -235,7 +235,7 @@ test("raw endpoint matrix covers current bot api surface", async () => {
     channel_id: "channel-1",
     message_id: "message-1",
     enable: true,
-    name: "like",
+    name: "thumbs_up",
   });
   await api.raw.addMessageKeys({
     channel_id: "channel-1",
