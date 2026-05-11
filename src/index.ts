@@ -15,4 +15,5 @@ export { Composer } from "./composer";
 export { Context } from "./context";
 export { ApiError, type ApiErrorOptions } from "./errors";
 export { OAuth } from "./oauth";
+export { ChannelType } from "./types/models";
 export type * from "./types";

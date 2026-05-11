@@ -16,12 +16,35 @@ export type ReactionItem = {
   avatar?: string;
 };
 
+export const ChannelType = {
+  text: 0,
+  voice: 1,
+  unused: 2,
+  directMessage: 3,
+  groupChat: 4,
+  circle: 5,
+  forum: 6,
+  announcement: 7,
+  systemMessage: 8,
+  communityNotice: 9,
+  circleNotice: 10,
+  activityNotice: 11,
+  topic: 12,
+  link: 13,
+  crypto: 14,
+  event: 15,
+  category: 127,
+  unknown: 255,
+} as const;
+
+export type ChannelType = (typeof ChannelType)[keyof typeof ChannelType];
+
 export type Message = {
   community_id?: string;
   channel_id: string;
   user_id: string;
   message_id: string;
-  channel_type: number;
+  channel_type: ChannelType;
   attachments?: Attachment[] | string | null;
   author?: unknown;
   content: string;
