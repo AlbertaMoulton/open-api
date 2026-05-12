@@ -108,6 +108,10 @@ try {
 
 ## Release
 
+Important: releases are tag-driven. Do not run `npm publish` from a local
+machine during the normal release flow. Commit the version bump, push `main`,
+then push a matching `vX.Y.Z` tag so GitHub Actions publishes the package.
+
 This package is published to npm by GitHub Actions. Do not publish from a local
 machine unless the workflow is unavailable.
 
@@ -146,10 +150,10 @@ login or an `NPM_TOKEN` secret is not required for normal releases.
 4. Push both `main` and the generated tag:
 
    ```bash
-   git push origin main v0.1.7
+   git push origin main vX.Y.Z
    ```
 
-   Replace `v0.1.7` with the tag printed by the release script.
+   Replace `vX.Y.Z` with the tag printed by the release script.
 
 ### What the release script does
 
@@ -189,6 +193,9 @@ npm view @teamgaga/open-api version
 
 - The workflow only runs for pushed tags matching `v*`; pushing `main` alone
   will not publish to npm.
+- Local `npm publish` is not the release path for this project. If it fails
+  with an auth or permission error, use the GitHub Actions tag workflow instead
+  of trying to fix local npm login for a normal release.
 - The tag must match `package.json` exactly. For example, tag `v0.1.7` requires
   `"version": "0.1.7"`.
 - Do not reuse or move a published release tag. Create a new patch version
