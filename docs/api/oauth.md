@@ -2,6 +2,7 @@
 title: "Oauth"
 date: "2025-07-08"
 ---
+
 # OAuth API（第三方授权）
 
 Teamgaga 开放平台使用 OAuth 2.0 授权码模式。第三方应用通过以下流程获取用户授权：
@@ -50,9 +51,9 @@ sequenceDiagram
 
 **请求参数**
 
-| 参数名 | 位置 | 类型 | 必填 | 描述 |
-|--------|------|------|------|------|
-| Authorization | header | string | 是 | Oauth Token (base64(app_id:app_secret)) |
+| 参数名        | 位置   | 类型   | 必填 | 描述                                    |
+| ------------- | ------ | ------ | ---- | --------------------------------------- |
+| Authorization | header | string | 是   | Oauth Token (base64(app_id:app_secret)) |
 
 **Body**
 [TokenReq](#TokenReq) 对象
@@ -70,9 +71,9 @@ sequenceDiagram
 
 **请求参数**
 
-| 参数名 | 位置 | 类型 | 必填 | 描述 |
-|--------|------|------|------|------|
-| Authorization | header | string | 是 | Access <access_token> |
+| 参数名        | 位置   | 类型   | 必填 | 描述                  |
+| ------------- | ------ | ------ | ---- | --------------------- |
+| Authorization | header | string | 是   | Access <access_token> |
 
 **响应参数**
 
@@ -87,9 +88,9 @@ sequenceDiagram
 
 **请求参数**
 
-| 参数名 | 位置 | 类型 | 必填 | 描述 |
-|--------|------|------|------|------|
-| Authorization | header | string | 是 | Access <access_token> |
+| 参数名        | 位置   | 类型   | 必填 | 描述                  |
+| ------------- | ------ | ------ | ---- | --------------------- |
+| Authorization | header | string | 是   | Access <access_token> |
 
 **响应参数**
 

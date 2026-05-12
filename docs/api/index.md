@@ -11,14 +11,14 @@ date: "2025-07-08"
 
 Base URL: `https://open.teamgaga.com`
 
-* **协议：** 仅支持 HTTPS
-* **数据格式：** JSON
-* **字符编码：** UTF-8
+- **协议：** 仅支持 HTTPS
+- **数据格式：** JSON
+- **字符编码：** UTF-8
 
 ## 认证方式
 
-| 认证类型 | Header 格式 | 适用接口 |
-|----------|-------------|----------|
-| Bot Token | `Authorization: Bot <bot_token>` | Bot API |
-| Access Token | `Authorization: Access <access_token>` | OAuth 资源接口 |
-| Base Token | `Authorization: Oauth <base64(app_id:app_secret)>` | OAuth Token 接口 |
+| 认证类型     | Header 格式                                        | 适用接口         |
+| ------------ | -------------------------------------------------- | ---------------- |
+| Bot Token    | `Authorization: Bot <bot_token>`                   | Bot API          |
+| Access Token | `Authorization: Access <access_token>`             | OAuth 资源接口   |
+| Base Token   | `Authorization: Oauth <base64(app_id:app_secret)>` | OAuth Token 接口 |
