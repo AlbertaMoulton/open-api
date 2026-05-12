@@ -108,18 +108,94 @@ try {
 
 ## Release
 
-Configure npm Trusted Publishing for `@teamgaga/open-api`:
+This package is published to npm by GitHub Actions. Do not publish from a local
+machine unless the workflow is unavailable.
+
+### One-time npm setup
+
+Configure npm Trusted Publishing for `@teamgaga/open-api` in the npm package
+settings:
 
 - Publisher: GitHub Actions
 - Owner: `AlbertaMoulton`
 - Repository: `open-api`
 - Workflow filename: `publish.yml`
+- Environment: leave empty unless the workflow is later changed to use one
 
-Then create a release tag from `main`:
+The workflow uses npm provenance/OIDC through GitHub Actions, so a local npm
+login or an `NPM_TOKEN` secret is not required for normal releases.
+
+### Release steps
+
+1. Make sure all intended code changes are merged or committed on `main`.
+2. Make sure the working tree is clean:
+
+   ```bash
+   git status --short --branch
+   ```
+
+3. Create the version bump commit and matching tag:
+
+   ```bash
+   pnpm run release:patch
+   ```
+
+   Use `pnpm run release:minor` or `pnpm run release:major` when the change
+   requires it.
+
+4. Push both `main` and the generated tag:
+
+   ```bash
+   git push origin main v0.1.7
+   ```
+
+   Replace `v0.1.7` with the tag printed by the release script.
+
+### What the release script does
+
+`scripts/release.mjs` protects the local release preparation step:
+
+- aborts if the working tree is dirty
+- aborts unless the current branch is `main`
+- bumps `package.json`
+- runs `pnpm run ready`
+- runs `pnpm pack --dry-run`
+- commits `release: vX.Y.Z`
+- creates the local `vX.Y.Z` tag
+
+### What GitHub Actions does
+
+Pushing a `v*` tag triggers `.github/workflows/publish.yml`. The workflow:
+
+- checks out the tagged commit
+- installs Node.js and pnpm dependencies
+- runs `pnpm run ready`
+- verifies the tag version matches `package.json`
+- packs the package into `.release`
+- publishes the tarball to npm with public access
+
+### Verify the release
+
+After pushing the tag, check the `Publish Package` workflow run in GitHub
+Actions. A successful run should publish the same version as the tag.
+
+You can also verify npm directly:
 
 ```bash
-pnpm run release:patch
-git push origin main v0.1.3
+npm view @teamgaga/open-api version
 ```
 
-Use `minor` or `major` when needed. The release script updates `package.json`, runs checks, tests, build, and `pnpm pack --dry-run`, then commits the version bump and creates the tag. GitHub Actions publishes tagged releases to npm.
+### Notes and pitfalls
+
+- The workflow only runs for pushed tags matching `v*`; pushing `main` alone
+  will not publish to npm.
+- The tag must match `package.json` exactly. For example, tag `v0.1.7` requires
+  `"version": "0.1.7"`.
+- Do not reuse or move a published release tag. Create a new patch version
+  instead.
+- Keep local test fixtures, tokens, and scratch files untracked. The package
+  only publishes `dist`, `README.md`, `LICENSE`, and `package.json`, but dirty
+  working trees can still block the release script.
+- If `npm publish` fails in GitHub Actions with a permission or OIDC error,
+  re-check the npm Trusted Publishing settings for owner, repository, workflow
+  filename, and package scope.
