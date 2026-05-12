@@ -1,62 +1,94 @@
-import { Client } from "./client";
-import type { BotOptions, Message, StartOptions } from "./types";
+import { Api, type ApiOptions } from "./api";
+import { Composer } from "./composer";
+import { Context } from "./context";
+import type { BotErrorHandler, BotOptions, StartOptions, Update } from "./types/bot";
 
-export type MessageContext = {
-  message: Message;
-  text: string;
-  reply: (content: string) => Promise<void>;
-};
+const DEFAULT_POLLING_INTERVAL = 3000;
 
-type MessageHandler = (ctx: MessageContext) => Promise<void> | void;
+export class Bot extends Composer<Context> {
+  readonly api: Api;
+  private readonly options: BotOptions;
+  private running = false;
+  private errorHandler?: BotErrorHandler;
 
-export class Bot {
-  readonly client: Client;
-  private readonly handlers: MessageHandler[] = [];
-
-  constructor(options: BotOptions | string) {
-    this.client = new Client(typeof options === "string" ? { botToken: options } : options);
+  constructor(token: string, options: BotOptions = {}) {
+    super();
+    this.options = options;
+    this.api = new Api(token, pickApiOptions(options));
   }
 
-  on(event: "message", handler: MessageHandler): this {
-    this.handlers.push(handler);
+  catch(handler: BotErrorHandler): this {
+    this.errorHandler = handler;
     return this;
   }
 
+  stop(): void {
+    this.running = false;
+  }
+
   async start(options: StartOptions = {}): Promise<void> {
-    const pollInterval = options.pollInterval ?? 3000;
+    const polling = {
+      ...this.options.polling,
+      ...options,
+    };
+    const interval = polling.interval ?? DEFAULT_POLLING_INTERVAL;
 
-    while (!options.signal?.aborted) {
+    this.running = true;
+
+    while (this.running && !options.signal?.aborted) {
       try {
-        const messages = await this.client.pollMessages();
+        const updates = await this.api.getUpdates({
+          limit: polling.limit,
+          filter: polling.allowed_updates?.map((update) => (update === "message" ? "im" : "event")),
+        });
 
-        for (const message of messages.im) {
-          await this.handleMessage(message);
+        for (const update of toUpdates(updates)) {
+          await this.handleUpdate(update);
         }
       } catch (error) {
-        console.error("Bot polling error:", error);
+        await this.handleError(error);
       }
 
-      await sleep(pollInterval, options.signal);
+      if (this.running && !options.signal?.aborted) {
+        await sleep(interval, options.signal);
+      }
+    }
+
+    this.running = false;
+  }
+
+  private async handleUpdate(update: Update): Promise<void> {
+    const ctx = new Context({ update, api: this.api });
+
+    try {
+      await this.middleware()(ctx);
+    } catch (error) {
+      await this.handleError(error, ctx);
     }
   }
 
-  private async handleMessage(message: Message): Promise<void> {
-    const ctx: MessageContext = {
-      message,
-      text: message.content,
-      reply: async (content) => {
-        await this.client.sendMessage({
-          channelId: message.channel_id,
-          content,
-          quoteId: message.message_id,
-        });
-      },
-    };
-
-    for (const handler of this.handlers) {
-      await handler(ctx);
+  private async handleError(error: unknown, ctx?: Context): Promise<void> {
+    if (this.errorHandler) {
+      await this.errorHandler(error, ctx);
+      return;
     }
+
+    throw error;
   }
+}
+
+function pickApiOptions(options: BotOptions): ApiOptions {
+  return {
+    base_url: options.base_url,
+    fetch: options.fetch,
+  };
+}
+
+function toUpdates(result: Awaited<ReturnType<Api["getUpdates"]>>): Update[] {
+  return [
+    ...result.im.map((message): Update => ({ type: "message", message })),
+    ...result.event.map((event): Update => ({ type: "event", event })),
+  ];
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {

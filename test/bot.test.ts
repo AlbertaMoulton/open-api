@@ -1,9 +1,9 @@
 import { expect, test, vi } from "vite-plus/test";
 import { Bot } from "../src/bot";
 
-test("Bot turns incoming messages into message contexts", async () => {
+test("Bot polls updates and dispatches message contexts", async () => {
   const abort = new AbortController();
-  const fetchMock = vi.fn(async (url: URL, init: RequestInit) => {
+  const fetchMock = vi.fn(async (_url: URL, init: RequestInit) => {
     if (init.method === "GET") {
       abort.abort();
       return Response.json({
@@ -17,8 +17,8 @@ test("Bot turns incoming messages into message contexts", async () => {
               user_id: "user-1",
               message_id: "message-1",
               channel_type: 0,
-              content: "roll",
-              created_at: "2026-04-27T00:00:00Z",
+              content: "/ping",
+              created_at: "2026-05-07T00:00:00Z",
             },
           ],
           event: [],
@@ -36,26 +36,66 @@ test("Bot turns incoming messages into message contexts", async () => {
     });
   });
 
-  const bot = new Bot({
-    botToken: "token",
-    fetch: fetchMock as unknown as typeof fetch,
+  const bot = new Bot("token", { fetch: fetchMock as unknown as typeof fetch });
+  bot.command("ping", async (ctx) => {
+    await ctx.reply("pong");
   });
 
-  bot.on("message", async (ctx) => {
-    if (ctx.text === "roll") {
-      await ctx.reply("You rolled 4.");
-    }
-  });
-
-  await bot.start({ pollInterval: 1, signal: abort.signal });
+  await bot.start({ interval: 1, signal: abort.signal });
 
   expect(fetchMock).toHaveBeenCalledTimes(2);
-  expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(
+  expect((fetchMock.mock.calls[1] as unknown as [URL, RequestInit])[1].body).toBe(
     JSON.stringify({
       channel_id: "channel-1",
-      content: "You rolled 4.",
+      content: "pong",
       quote_id: "message-1",
-      type: 0,
     }),
   );
+});
+
+test("Bot catch handles middleware errors and continues polling batch", async () => {
+  const abort = new AbortController();
+  const fetchMock = vi.fn(async () => {
+    abort.abort();
+    return Response.json({
+      status: true,
+      code: 1000,
+      message: "Ok",
+      data: {
+        im: [
+          {
+            channel_id: "c1",
+            user_id: "u1",
+            message_id: "m1",
+            channel_type: 0,
+            content: "first",
+            created_at: "2026-05-07T00:00:00Z",
+          },
+          {
+            channel_id: "c2",
+            user_id: "u2",
+            message_id: "m2",
+            channel_type: 0,
+            content: "second",
+            created_at: "2026-05-07T00:00:00Z",
+          },
+        ],
+        event: [],
+      },
+      request_id: "request-id",
+    });
+  });
+  const bot = new Bot("token", { fetch: fetchMock as unknown as typeof fetch });
+  const errors: unknown[] = [];
+  const seen: string[] = [];
+  bot.on("message", (ctx) => {
+    seen.push(ctx.text ?? "");
+    if (ctx.text === "first") throw new Error("boom");
+  });
+  bot.catch((error) => errors.push(error));
+
+  await bot.start({ interval: 1, signal: abort.signal });
+
+  expect(errors).toHaveLength(1);
+  expect(seen).toEqual(["first", "second"]);
 });

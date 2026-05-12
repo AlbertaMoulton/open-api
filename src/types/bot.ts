@@ -1,0 +1,52 @@
+import type { Api } from "../api";
+import type { Context } from "../context";
+import type { Event, Message } from "./models";
+
+export type Update =
+  | {
+      type: "message";
+      message: Message;
+    }
+  | {
+      type: "event";
+      event: Event;
+    };
+
+export type NextFunction = () => Promise<void>;
+
+export type Middleware<C extends Context = Context> = (
+  ctx: C,
+  next: NextFunction,
+) => void | Promise<void>;
+
+export type MiddlewareRunner<C extends Context = Context> = (
+  ctx: C,
+  next?: NextFunction,
+) => void | Promise<void>;
+
+export type Filter<C extends Context = Context> = (ctx: C) => boolean;
+
+export type ComposerFilter = "message" | "event" | `event:${string}`;
+
+export type BotOptions = {
+  base_url?: string;
+  fetch?: typeof fetch;
+  polling?: PollingOptions;
+};
+
+export type PollingOptions = {
+  limit?: number;
+  interval?: number;
+  allowed_updates?: Array<"message" | "event">;
+};
+
+export type StartOptions = PollingOptions & {
+  signal?: AbortSignal;
+};
+
+export type BotErrorHandler<C extends Context = Context> = (error: unknown, ctx?: C) => unknown;
+
+export type ContextFactoryOptions = {
+  update: Update;
+  api: Api;
+};

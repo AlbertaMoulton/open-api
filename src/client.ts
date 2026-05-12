@@ -1,79 +1,101 @@
-import type {
-  PollMessagesOptions,
-  PullMessagesResponse,
-  SendMessageParams,
-  SendMessageResponse,
-  TeamGagaApiResponse,
-  ClientOptions,
-} from "./types";
+import { ApiError } from "./errors";
 
 const DEFAULT_BASE_URL = "https://open.teamgaga.com";
 
-export class Client {
-  private readonly botToken: string;
+export type AuthScheme = "Bot" | "Oauth" | "Access";
+
+export type QueryValue = string | number | boolean | null | undefined;
+
+export type QueryParams = Record<string, QueryValue | QueryValue[]>;
+
+export type ApiClientOptions = {
+  token: string;
+  auth: AuthScheme;
+  base_url?: string;
+  fetch?: typeof fetch;
+};
+
+export type ApiClientRequestOptions = {
+  method: string;
+  query?: QueryParams;
+  body?: unknown;
+  headers?: HeadersInit;
+  signal?: AbortSignal;
+};
+
+type ApiEnvelope<T> = {
+  status: boolean;
+  code: number;
+  message: string;
+  data: T;
+  request_id?: string;
+};
+
+export class ApiClient {
+  private readonly token: string;
+  private readonly auth: AuthScheme;
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
 
-  constructor(options: ClientOptions) {
-    this.botToken = options.botToken;
-    this.baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
+  constructor(options: ApiClientOptions) {
+    this.token = options.token;
+    this.auth = options.auth;
+    this.baseUrl = options.base_url ?? DEFAULT_BASE_URL;
     this.fetchImpl = options.fetch ?? fetch;
   }
 
-  async pollMessages(options: PollMessagesOptions = {}): Promise<PullMessagesResponse> {
-    const url = new URL("/bot/v1/messages", this.baseUrl);
+  async request<T>(path: string | URL, options: ApiClientRequestOptions): Promise<T> {
+    const url = path instanceof URL ? path : new URL(path, this.baseUrl);
+    appendQuery(url, options.query);
 
-    if (options.limit !== undefined) {
-      url.searchParams.set("limit", String(options.limit));
-    }
+    const headers = new Headers(options.headers);
+    headers.set("Authorization", `${this.auth} ${this.token}`);
 
-    for (const filter of options.filter ?? []) {
-      url.searchParams.append("filter[]", filter);
-    }
-
-    const result = await this.request<PullMessagesResponse>(url, {
-      method: "GET",
-    });
-
-    return result;
-  }
-
-  async sendMessage(params: SendMessageParams): Promise<SendMessageResponse> {
-    return this.request<SendMessageResponse>("/bot/v1/messages", {
-      method: "POST",
-      body: JSON.stringify({
-        channel_id: params.channelId,
-        content: params.content,
-        quote_id: params.quoteId,
-        type: params.type ?? 0,
-      }),
-    });
-  }
-
-  private async request<T>(pathOrUrl: string | URL, init: RequestInit): Promise<T> {
-    const url = pathOrUrl instanceof URL ? pathOrUrl : new URL(pathOrUrl, this.baseUrl);
-    const headers = new Headers(init.headers);
-
-    headers.set("Authorization", `Bot ${this.botToken}`);
-    if (!headers.has("Content-Type")) {
-      headers.set("Content-Type", "application/json");
-    }
-
-    const response = await this.fetchImpl(url, {
-      ...init,
+    const init: RequestInit = {
+      method: options.method,
       headers,
-    });
+      signal: options.signal,
+    };
+
+    if (options.body !== undefined) {
+      headers.set("Content-Type", "application/json");
+      init.body = JSON.stringify(options.body);
+    }
+
+    const response = await this.fetchImpl(url, init);
+    const envelope = (await response.json()) as Partial<ApiEnvelope<T>>;
 
     if (!response.ok) {
-      throw new Error(`TeamGaga API error: ${response.status}`);
+      throw new ApiError(envelope.message ?? `TeamGaga API error: ${response.status}`, {
+        status: response.status,
+        code: envelope.code,
+        request_id: envelope.request_id,
+        response,
+      });
     }
 
-    const result = (await response.json()) as TeamGagaApiResponse<T>;
-
-    if (!result.status) {
-      throw new Error(`TeamGaga API error ${result.code}: ${result.message}`);
+    if (envelope.status !== true) {
+      throw new ApiError(envelope.message ?? "TeamGaga API error", {
+        status: response.status,
+        code: envelope.code,
+        request_id: envelope.request_id,
+        response,
+      });
     }
 
-    return result.data;
+    return envelope.data as T;
+  }
+}
+
+function appendQuery(url: URL, query: QueryParams | undefined): void {
+  if (!query) return;
+
+  for (const [key, value] of Object.entries(query)) {
+    const values = Array.isArray(value) ? value : [value];
+
+    for (const item of values) {
+      if (item === undefined || item === null) continue;
+      url.searchParams.append(key, String(item));
+    }
   }
 }

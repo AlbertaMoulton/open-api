@@ -43,7 +43,7 @@ bot.command("ping", async (ctx) => {
   await ctx.reply("pong");
 });
 
-bot.on("message:text", async (ctx) => {
+bot.on("message", async (ctx) => {
   await ctx.reply(`You said: ${ctx.text}`);
 });
 
@@ -56,11 +56,11 @@ await bot.start();
 
 ### Api
 
-`Api` is the public, typed facade over TeamGaga Bot API endpoints. It should use TypeScript-friendly camelCase parameter names while keeping returned server models close to the documented field names.
+`Api` is the public, typed facade over TeamGaga Bot API endpoints. It should use documented snake_case parameter names while keeping returned server models close to the documented field names.
 
-### Client and Raw HTTP
+### Internal ApiClient and Raw HTTP
 
-The lower-level client handles base URL, auth headers, query strings, JSON bodies, multipart form data, response unwrapping, and error construction. It is an internal implementation detail by default. A raw escape hatch may exist later, but it must not be the primary public API.
+The lower-level `ApiClient` handles base URL, auth headers, query strings, JSON bodies, multipart form data, response unwrapping, and error construction. It is an internal implementation detail and must not be exported from the package entry point. The public low-level escape hatch should follow grammY's shape: `bot.api.raw` for documented payloads and `bot.api.use(...)` for API call transformers.
 
 ## Proposed File Layout
 
@@ -90,12 +90,12 @@ src/
 
 ```ts
 const bot = new Bot(token, {
-  baseUrl: "https://open.teamgaga.com",
+  base_url: "https://open.teamgaga.com",
   fetch,
   polling: {
     limit: 200,
     interval: 3000,
-    allowedUpdates: ["message", "event"],
+    allowed_updates: ["message", "event"],
   },
 });
 ```
@@ -117,8 +117,6 @@ First-phase filters:
 
 ```ts
 "message";
-"message:text";
-"message:markdown";
 "event";
 "event:Reaction";
 "event:Join";
@@ -152,7 +150,7 @@ ctx.api;
 ctx.message;
 ctx.event;
 ctx.chatId;
-ctx.channelId;
+ctx.channel_id;
 ctx.communityId;
 ctx.userId;
 ctx.messageId;
@@ -167,12 +165,11 @@ ctx.replyMarkdown(content, options?);
 ctx.editMessage(content, options?);
 ctx.deleteMessage();
 ctx.react(reaction);
-ctx.answerCallback(data?);
 ```
 
 `ctx.reply` should send to the current channel and quote the current message when a message ID is available. Options should allow callers to override quote behavior and pass message fields such as attachments, reactions, ephemeral visibility, and rich text flags.
 
-`ctx.answerCallback` should be included only if the documented callback response endpoint is available in the implementation phase. If the docs do not provide enough endpoint detail, leave it out of phase one rather than guessing.
+The SDK does not provide an `answerCallback` helper. Callback events can still be observed with `event:Callback` filters.
 
 ## Public Api Facade
 
@@ -186,8 +183,8 @@ api.sendMessage(params);
 api.sendBatchMessages(params);
 api.sendMarkdownMessage(params);
 api.editMessage(messageId, params);
-api.deleteMessage(channelId, messageId);
-api.setMessageReaction(channelId, messageId, params);
+api.deleteMessage(channel_id, messageId);
+api.setMessageReaction(channel_id, messageId, params);
 api.addMessageKeys(params);
 api.deleteMessageKey(params);
 ```
@@ -214,14 +211,32 @@ api.updateCommunityMemberRoles(communityId, params);
 api.getCommunityRoleMembers(communityId, roleId, options?);
 ```
 
-User, DM, bot, and image methods:
+User, DM, and bot methods:
 
 ```ts
 api.getUser(userId, options?);
 api.createDmChannel(userId);
 api.getMe();
-api.uploadImage(params);
 ```
+
+`Api` should also expose a grammY-style transformable raw layer:
+
+```ts
+api.raw.sendMessage({
+  channel_id: "channel-id",
+  content: "Hello",
+});
+
+api.use(async (prev, method, payload, signal) => {
+  return prev(method, payload, signal);
+});
+```
+
+`Client` or `ApiClient` must not be exported from `src/index.ts`.
+
+The raw layer should cover the Bot API methods implemented by the facade so transformers can observe both raw calls and facade calls.
+
+Method-specific transformers should be typed with a helper such as `MethodTransformer<"sendMessage">` so plugin authors can opt into exact payload and result types for a single method.
 
 ## Endpoint Version Policy
 
@@ -251,12 +266,12 @@ OAuth should be a separate entry point because it uses `Oauth` and `Access` auth
 import { OAuth } from "@teamgaga/open-api";
 
 const oauth = new OAuth({
-  appId,
-  appSecret,
+  app_id,
+  app_secret,
 });
 
 const token = await oauth.createToken({
-  grantType: "access_token",
+  grant_type: "access_token",
   code,
 });
 
@@ -286,20 +301,20 @@ Authorization: Access <access_token>
 
 ## Type Strategy
 
-Public request parameter types should use camelCase names:
+Public request parameter types should use documented snake_case names:
 
 ```ts
 type SendMessageParams = {
-  channelId: string;
+  channel_id: string;
   content: string;
   type?: number;
   attachments?: Attachment[];
   ephemeral?: boolean;
-  userIds?: string[];
-  disableReactions?: boolean;
+  user_ids?: string[];
+  disable_reactions?: boolean;
   reactions?: ReactionItem[];
   richtext?: boolean;
-  quoteId?: string;
+  quote_id?: string;
 };
 ```
 
@@ -327,13 +342,13 @@ Avoid public `Req` and `Resp` suffixes unless mirroring a documented object is n
 
 ## Error Model
 
-All failed API calls should throw `TeamGagaApiError`.
+All failed API calls should throw `ApiError`.
 
 ```ts
-class TeamGagaApiError extends Error {
+class ApiError extends Error {
   readonly status: number;
   readonly code?: number;
-  readonly requestId?: string;
+  readonly request_id?: string;
   readonly response?: Response;
 }
 ```
@@ -344,7 +359,7 @@ The error should cover:
 - API envelopes whose `status` field is false.
 - Invalid or unexpected response envelopes.
 
-Network and abort errors from `fetch` may pass through unchanged or be wrapped in a separate `TeamGagaNetworkError` later. Phase one should document the chosen behavior in tests.
+Network and abort errors from `fetch` may pass through unchanged or be wrapped in a separate `NetworkError` later. Phase one should document the chosen behavior in tests.
 
 ## Testing Strategy
 
@@ -355,10 +370,10 @@ Required first-phase tests:
 - Each `Api` method sends the correct HTTP method, path, query, body, and auth header.
 - `api.sendMessage` calls `POST /bot/v2/messages`.
 - `Bot.start()` converts polled messages and events into `Context` objects.
-- `Composer` dispatches `message`, `message:text`, `event:*`, and `command` filters correctly.
+- `Composer` dispatches `message`, `event:*`, and `command` filters correctly.
 - Middleware order and `next()` behavior match the documented model.
 - `Context` convenience methods call the expected `Api` methods.
-- API envelope failures throw `TeamGagaApiError` with code, status, message, and request ID.
+- API envelope failures throw `ApiError` with code, status, message, and request ID.
 - OAuth token and resource methods use the correct auth header schemes.
 
 ## Implementation Phases
@@ -379,13 +394,10 @@ Required first-phase tests:
 
 ### Phase 3: Extension Points
 
-- Evaluate a public raw API escape hatch.
 - Add plugin conventions if real use cases emerge.
 - Consider webhook or custom update source support if TeamGaga adds or documents the capability.
 
 ## Open Questions
 
-- Whether `ctx.answerCallback` has a documented endpoint in the current API references. If not, it should be removed from phase one.
 - Whether `Authorization: Teamgaga Token <bot_token>` in `new_general.md` or `Authorization: Bot <bot_token>` in `index.md` is the canonical Bot API auth scheme. The implementation should verify this before coding.
-- Whether markdown messages should be treated as a distinct message type filter or only as a sending method. Phase one can support `message:text` first and add `message:markdown` only if incoming payloads identify it reliably.
-
+- Whether markdown messages should be treated only as a sending method or whether incoming payloads expose enough stable metadata for a future custom filter.

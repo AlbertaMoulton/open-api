@@ -38,8 +38,8 @@
   "scripts": {
     "ready": "pnpm run check && pnpm run test && pnpm run build",
     "build": "vp pack",
-    "check": "vp check",
-    "check:fix": "vp check --fix",
+    "check": "vp check README.md src test docs/superpowers docs/sdk package.json tsconfig.json vite.config.ts",
+    "check:fix": "vp check --fix README.md src test docs/superpowers docs/sdk package.json tsconfig.json vite.config.ts",
     "dev": "vp pack --watch",
     "fmt": "vp fmt . --write",
     "fmt:check": "vp fmt --check",
@@ -60,5 +60,5 @@
   "engines": {
     "node": ">=22.12.0"
   },
-  "packageManager": "pnpm@10.33.2"
+  "packageManager": "pnpm@11.0.9"
 }

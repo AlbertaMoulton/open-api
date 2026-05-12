@@ -1,74 +1,104 @@
 import { expect, test, vi } from "vite-plus/test";
-import { Client } from "../src/client";
+import { ApiClient } from "../src/client";
+import { ApiError } from "../src/errors";
 
-test("pollMessages calls TeamGaga and returns response data", async () => {
-  const fetchMock = vi.fn(
-    async (_input: Parameters<typeof fetch>[0], _init?: Parameters<typeof fetch>[1]) => {
-      return Response.json({
-        status: true,
-        code: 1000,
-        message: "Ok",
-        data: { im: [], event: [] },
-        request_id: "request-id",
-      });
-    },
+test("ApiClient unwraps successful TeamGaga envelopes", async () => {
+  const fetchMock = vi.fn(async () =>
+    Response.json({
+      status: true,
+      code: 1000,
+      message: "Ok",
+      data: { ok: true },
+      request_id: "request-id",
+    }),
   );
-
-  const client = new Client({
-    botToken: "token",
+  const client = new ApiClient({
+    token: "token",
+    auth: "Bot",
     fetch: fetchMock as unknown as typeof fetch,
   });
 
-  const messages = await client.pollMessages({ limit: 10, filter: ["im"] });
-  const [, init] = fetchMock.mock.calls[0] as Parameters<typeof fetch>;
-  const headers = init?.headers;
+  const result = await client.request<{ ok: boolean }>("/bot/v1/me", { method: "GET" });
 
-  expect(messages).toEqual({ im: [], event: [] });
+  expect(result).toEqual({ ok: true });
   expect(fetchMock).toHaveBeenCalledWith(
-    new URL("https://open.teamgaga.com/bot/v1/messages?limit=10&filter%5B%5D=im"),
-    expect.objectContaining({
-      method: "GET",
-    }),
+    new URL("https://open.teamgaga.com/bot/v1/me"),
+    expect.objectContaining({ method: "GET" }),
   );
-  expect(headers).toBeInstanceOf(Headers);
-  expect((headers as Headers).get("Authorization")).toBe("Bot token");
 });
 
-test("sendMessage posts a text message", async () => {
-  const fetchMock = vi.fn(
-    async (_input: Parameters<typeof fetch>[0], _init?: Parameters<typeof fetch>[1]) => {
-      return Response.json({
-        status: true,
-        code: 1000,
-        message: "Ok",
-        data: { message_id: "message-1" },
-        request_id: "request-id",
-      });
-    },
+test("ApiClient serializes query params and bot auth header", async () => {
+  const fetchMock = vi.fn(async () =>
+    Response.json({
+      status: true,
+      code: 1000,
+      message: "Ok",
+      data: [],
+      request_id: "request-id",
+    }),
   );
-
-  const client = new Client({
-    botToken: "token",
+  const client = new ApiClient({
+    token: "token",
+    auth: "Bot",
     fetch: fetchMock as unknown as typeof fetch,
   });
 
-  const result = await client.sendMessage({
-    channelId: "channel-1",
-    content: "hello",
-    quoteId: "message-0",
+  await client.request("/bot/v1/messages", {
+    method: "GET",
+    query: { limit: 10, filter: ["im", "event"] },
   });
 
-  expect(result.message_id).toBe("message-1");
-  expect(fetchMock).toHaveBeenCalledWith(
-    new URL("https://open.teamgaga.com/bot/v1/messages"),
-    expect.objectContaining({
-      method: "POST",
-      body: JSON.stringify({
-        channel_id: "channel-1",
-        content: "hello",
-        quote_id: "message-0",
-        type: 0,
-      }),
+  const [url, init] = fetchMock.mock.calls[0] as unknown as [URL, RequestInit];
+
+  expect(url.toString()).toBe(
+    "https://open.teamgaga.com/bot/v1/messages?limit=10&filter=im&filter=event",
+  );
+  expect((init.headers as Headers).get("Authorization")).toBe("Bot token");
+});
+
+test("ApiClient throws ApiError for failed envelopes", async () => {
+  const fetchMock = vi.fn(async () =>
+    Response.json({
+      status: false,
+      code: 4001,
+      message: "Nope",
+      data: null,
+      request_id: "request-id",
     }),
   );
+  const client = new ApiClient({
+    token: "token",
+    auth: "Bot",
+    fetch: fetchMock as unknown as typeof fetch,
+  });
+
+  await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toMatchObject({
+    name: "ApiError",
+    code: 4001,
+    request_id: "request-id",
+    status: 200,
+    message: "Nope",
+  });
+});
+
+test("ApiClient throws ApiError for non-2xx HTTP responses", async () => {
+  const fetchMock = vi.fn(async () =>
+    Response.json(
+      {
+        status: false,
+        code: 5000,
+        message: "Broken",
+        data: null,
+        request_id: "request-id",
+      },
+      { status: 500 },
+    ),
+  );
+  const client = new ApiClient({
+    token: "token",
+    auth: "Bot",
+    fetch: fetchMock as unknown as typeof fetch,
+  });
+
+  await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toBeInstanceOf(ApiError);
 });
