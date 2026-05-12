@@ -63,7 +63,7 @@ export class ApiClient {
     }
 
     const response = await this.fetchImpl(url, init);
-    const envelope = (await response.json()) as Partial<ApiEnvelope<T>>;
+    const envelope = await parseEnvelope<T>(response);
 
     if (!response.ok) {
       throw new ApiError(envelope.message ?? `TeamGaga API error: ${response.status}`, {
@@ -98,4 +98,22 @@ function appendQuery(url: URL, query: QueryParams | undefined): void {
       url.searchParams.append(key, String(item));
     }
   }
+}
+
+async function parseEnvelope<T>(response: Response): Promise<Partial<ApiEnvelope<T>>> {
+  const text = await response.text();
+
+  try {
+    return JSON.parse(text) as Partial<ApiEnvelope<T>>;
+  } catch {
+    throw new ApiError(`TeamGaga API returned non-JSON response: ${preview(text)}`, {
+      status: response.status,
+      response,
+    });
+  }
+}
+
+function preview(text: string): string {
+  const trimmed = text.trim();
+  return trimmed.length > 200 ? `${trimmed.slice(0, 200)}...` : trimmed;
 }

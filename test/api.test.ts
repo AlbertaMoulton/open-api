@@ -37,6 +37,24 @@ test("sendMessage uses latest v2 endpoint without versioned method name", async 
         channel_id: "channel-1",
         content: "hello",
         quote_id: "message-0",
+        type: 0,
+      }),
+    }),
+  );
+});
+
+test("sendMessage preserves explicit message type", async () => {
+  const { api, fetchMock } = createApi();
+
+  await api.sendMessage({ channel_id: "channel-1", content: "hello", type: 15 });
+
+  expect(fetchMock).toHaveBeenCalledWith(
+    new URL("https://open.teamgaga.com/bot/v2/messages"),
+    expect.objectContaining({
+      body: JSON.stringify({
+        channel_id: "channel-1",
+        content: "hello",
+        type: 15,
       }),
     }),
   );

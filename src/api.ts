@@ -512,7 +512,7 @@ function messageBody(params: SendMessageParams): RawSendMessageParams {
     channel_id: params.channel_id,
     content: params.content,
     quote_id: params.quote_id,
-    type: params.type,
+    type: params.type ?? 0,
     attachments: params.attachments,
     ephemeral: params.ephemeral,
     user_ids: params.user_ids,

@@ -49,6 +49,7 @@ test("Bot polls updates and dispatches message contexts", async () => {
       channel_id: "channel-1",
       content: "pong",
       quote_id: "message-1",
+      type: 0,
     }),
   );
 });

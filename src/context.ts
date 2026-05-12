@@ -58,6 +58,7 @@ export class Context {
       channel_id: channelId,
       content,
       quote_id: quote ? (quote_id ?? this.messageId) : quote_id,
+      type: rest.type ?? 0,
     });
   }
 

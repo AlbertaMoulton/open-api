@@ -102,3 +102,24 @@ test("ApiClient throws ApiError for non-2xx HTTP responses", async () => {
 
   await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toBeInstanceOf(ApiError);
 });
+
+test("ApiClient throws ApiError for non-JSON responses", async () => {
+  const fetchMock = vi.fn(
+    async () =>
+      new Response("<html>server error</html>", {
+        status: 500,
+        headers: { "Content-Type": "text/html" },
+      }),
+  );
+  const client = new ApiClient({
+    token: "token",
+    auth: "Bot",
+    fetch: fetchMock as unknown as typeof fetch,
+  });
+
+  await expect(client.request("/bot/v1/me", { method: "GET" })).rejects.toMatchObject({
+    name: "ApiError",
+    status: 500,
+    message: "TeamGaga API returned non-JSON response: <html>server error</html>",
+  });
+});
