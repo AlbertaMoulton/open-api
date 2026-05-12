@@ -1,5 +1,14 @@
 import { expect, test } from "vite-plus/test";
-import { ChannelType, type Message } from "../src";
+import { ChannelType, type Event, type EventType, type Message, type ReactionItem } from "../src";
+
+type Assert<T extends true> = T;
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+type EventData<Action extends EventType> = Extract<Event, { action: Action }>["data"];
+
+function expectType<_T extends true>() {
+  expect(true).toBe(true);
+}
 
 test("Message channel_type uses named channel type values", () => {
   const message = {
@@ -13,4 +22,16 @@ test("Message channel_type uses named channel type values", () => {
 
   expect(message.channel_type).toBe(0);
   expect(ChannelType.unknown).toBe(255);
+});
+
+test("Event data types are narrowed by action", () => {
+  expectType<Assert<Equal<EventData<"DeleteMessage">, null>>>();
+  expectType<Assert<Equal<EventData<"Reaction">, ReactionItem>>>();
+  expectType<Assert<Equal<EventData<"Join">, { code: string; inviter: string }>>>();
+  expectType<Assert<Equal<EventData<"Callback">, unknown>>>();
+  expectType<Assert<Equal<EventData<"Unknown">, unknown>>>();
+});
+
+test("ReactionItem includes enable state", () => {
+  expectType<Assert<Equal<ReactionItem["enable"], boolean>>>();
 });

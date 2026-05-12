@@ -12,6 +12,7 @@ export type Attachment = {
 };
 
 export type ReactionItem = {
+  enable: boolean;
   name?: string;
   avatar?: string;
 };
@@ -54,9 +55,15 @@ export type Message = {
 
 export type EventType = "Reaction" | "Join" | "Callback" | "DeleteMessage" | "Unknown";
 
-export type Event = {
-  action: string;
-  data: unknown;
+export type EventDataByType = {
+  Reaction: ReactionItem;
+  Join: { code: string; inviter: string };
+  Callback: unknown;
+  DeleteMessage: null;
+  Unknown: unknown;
+};
+
+export type EventBase = {
   channel_id?: string | null;
   community_bots?: number[] | null;
   community_id?: string | null;
@@ -64,6 +71,14 @@ export type Event = {
   message_id?: string | null;
   user_id?: string | null;
 };
+
+export type Event<T extends EventType = EventType> = EventBase &
+  {
+    [Action in T]: {
+      action: Action;
+      data: EventDataByType[Action];
+    };
+  }[T];
 
 export type PullMessageResponse = {
   im: Message[];
